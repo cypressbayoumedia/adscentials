@@ -1,3 +1,55 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth.guard';
+import { onboardingGuard } from './core/onboarding.guard';
 
-export const routes: Routes = [];
+import { canActivate, redirectLoggedInTo } from '@angular/fire/auth-guard';
+
+const redirectLoggedInToDashboard = () => redirectLoggedInTo(['dashboard']);
+
+export const routes: Routes = [
+    {
+        path: '',
+        redirectTo: 'entry/login',
+        pathMatch: 'full'
+    },
+    {
+        path: 'entry',
+        children: [
+            {
+                path: 'login',
+                loadComponent: () => import('./entry/login/login').then(m => m.Login),
+                ...canActivate(redirectLoggedInToDashboard)
+            },
+            {
+                path: 'signup',
+                loadComponent: () => import('./entry/signup/signup').then(m => m.Signup),
+                ...canActivate(redirectLoggedInToDashboard)
+            },
+            {
+                path: 'onboarding',
+                canActivate: [authGuard],
+                loadComponent: () => import('./entry/onboarding/onboarding').then(m => m.Onboarding)
+            }
+        ]
+    },
+    {
+        path: 'home',
+        canActivate: [onboardingGuard],
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+    },
+    {
+        path: 'dashboard',
+        canActivate: [onboardingGuard],
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+    },
+    {
+        path: 'settings',
+        canActivate: [onboardingGuard],
+        loadComponent: () => import('./pages/settings/settings').then(m => m.Settings)
+    },
+    {
+        path: ':handle',
+        loadComponent: () => import('./pages/storefront/storefront').then(m => m.Storefront)
+    }
+];

@@ -1,0 +1,70 @@
+<div class="onboarding-container">
+    <div class="card">
+        <div class="header">
+            <h1>Complete your profile</h1>
+            <p>Choose a unique handle and tell us who you are.</p>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="error-alert">{{ errorMessage() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+            <!-- Profile Picture -->
+            <div class="form-group center">
+                <label>Profile Picture</label>
+                <div class="avatar-preview">
+                    <img [src]="form.value.photoURL || 'https://via.placeholder.com/100'" alt="Avatar">
+                </div>
+                <input type="url" formControlName="photoURL" placeholder="https://example.com/photo.jpg"
+                    class="sm-input">
+            </div>
+
+            <!-- Handle Input -->
+            <div class="form-group">
+                <label for="handle">Handle</label>
+                <div class="input-wrapper">
+                    <span class="prefix">@</span>
+                    <input id="handle" type="text" formControlName="handle" placeholder="username"
+                        [class.valid]="handleAvailable() === true" [class.invalid]="handleAvailable() === false">
+                    @if (isChecking()) {
+                    <span class="input-spinner"></span>
+                    }
+                </div>
+
+                <div class="status-message">
+                    @if (handleAvailable() === true) {
+                    <span class="success">Handle is available!</span>
+                    } @else if (handleAvailable() === false) {
+                    <span class="error">Handle is taken. Try another.</span>
+                    } @else if (form.controls['handle'].hasError('pattern')) {
+                    <span class="hint">Lowercase letters, numbers, and hyphens only.</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Display Name -->
+            <div class="form-group">
+                <label for="displayName">Display Name</label>
+                <input id="displayName" type="text" formControlName="displayName" placeholder="John Doe">
+            </div>
+
+            <!-- Bio -->
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea id="bio" formControlName="bio" placeholder="Tell us about yourself..." class="bio-input"
+                    rows="3"></textarea>
+                <div class="char-count">{{ form.get('bio')?.value?.length || 0 }}/160</div>
+            </div>
+
+            <button type="submit" class="btn-primary"
+                [disabled]="form.invalid || isLoading() || handleAvailable() === false">
+                @if (isLoading()) {
+                <span class="spinner"></span>
+                } @else {
+                Looks Good
+                }
+            </button>
+        </form>
+    </div>
+</div>

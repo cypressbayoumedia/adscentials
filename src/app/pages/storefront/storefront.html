@@ -1,0 +1,123 @@
+<div class="storefront-container">
+    @if (isLoading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>LOADING VENDING MACHINE...</p>
+    </div>
+    } @else if (error()) {
+    <div class="error-state">
+        <h1>404</h1>
+        <p>STOREFRONT NOT FOUND</p>
+        <a href="/" class="btn-brutal">GO HOME</a>
+    </div>
+    } @else if (userProfile()) {
+
+    <!-- THE BILLBOARD -->
+    <header class="billboard">
+        <div class="avatar-box">
+            <img [src]="userProfile()?.photoURL || 'https://via.placeholder.com/150'" alt="Creator">
+        </div>
+        <div class="creator-details">
+            <h1 class="handle">@{{ handle() }}</h1>
+
+            <p class="bio">{{ userProfile()?.bio || userProfile()?.displayName || 'AVAILABLE FOR BOOKING' }}</p>
+        </div>
+    </header>
+
+    <!-- SOCIAL TICKER -->
+    <!-- <div class="social-ticker-container">
+        <div class="ticker-wrap">
+            <div class="ticker-item">{{ tickerText() }}</div>
+        </div>
+    </div> -->
+
+    <!-- VENDING GRID -->
+    <div class="vending-grid">
+        @for (slot of slots(); track slot.slotId) {
+        <div class="vending-card" [ngClass]="{
+            'yellow': slot.status === 'available', 
+            'cyan': slot.status === 'available',
+            'grey': slot.status === 'sold' || slot.status === 'completed'
+        }">
+            <div class="card-header">
+                <!-- We'll use a simple date pipe for now -->
+                <span class="dymo-label">{{ slot.date.toDate() | date:'MMM d' }}</span>
+                @if (slot.status === 'sold') {
+                <span class="price-tag">SOLD</span>
+                } @else {
+                <span class="price-tag">${{ slot.price / 100 }}</span>
+                }
+            </div>
+            <div class="card-body">
+
+            </div>
+            <h2>{{ slot.title || ((slot.platform + ' ' + slot.type) | uppercase) }}</h2>
+            @if (slot.description) {
+            <p>{{ slot.description }}</p>
+            } @else {
+            <p>{{ slot.platform | titlecase }} Placement</p>
+            }
+            <button class="btn-buy" [disabled]="slot.status !== 'available'" (click)="openCheckout(slot)">
+                {{ slot.status === 'sold' ? 'SOLD OUT' : 'SECURE THIS SPOT' }}
+            </button>
+        </div>
+        } @empty {
+        <div class="empty-state">
+            <h2>NO SLOTS AVAILABLE</h2>
+            <p>CHECK BACK SOON</p>
+        </div>
+        }
+    </div>
+
+    <!-- CHECKOUT DRAWER (Modal) -->
+    @if (selectedItem(); as item) {
+    <div class="drawer-backdrop" (click)="closeCheckout()">
+        <div class="drawer" (click)="$event.stopPropagation()">
+            <div class="drawer-header">
+                <h2>SECURE SPOT</h2>
+                <button class="btn-close" (click)="closeCheckout()">X</button>
+            </div>
+            <div class="drawer-content">
+                <div class="summary-card">
+                    <h3>{{ item!.title || (item!.type | uppercase) }} - {{ item!.date.toDate() | date:'shortDate' }}
+                    </h3>
+                    <p>Total: ${{ item!.price / 100 }}</p>
+                </div>
+
+                <form (ngSubmit)="purchase()">
+                    <div class="field">
+                        <label>YOUR URL</label>
+                        <input type="text" placeholder="https://mybrand.com" [(ngModel)]="checkoutForm.targetUrl"
+                            name="targetUrl" required>
+                    </div>
+                    <div class="field">
+                        <label>BRAND LOGO URL</label>
+                        <input type="text" placeholder="https://mybrand.com/logo.png" [(ngModel)]="checkoutForm.logoUrl"
+                            name="logoUrl">
+                    </div>
+                    <div class="field">
+                        <label>SCRIPT / TALKING POINTS</label>
+                        <textarea placeholder="Key points to mention..." [(ngModel)]="checkoutForm.script" name="script"
+                            required></textarea>
+                    </div>
+                    <div class="field">
+                        <label>SPECIAL INSTRUCTIONS</label>
+                        <textarea placeholder="Pronunciation guide, 'Energetic' vibe, etc."
+                            [(ngModel)]="checkoutForm.instructions" name="instructions" rows="2"></textarea>
+                    </div>
+                    <button class="btn-pay" [disabled]="isProcessing()">
+                        @if (isProcessing()) {
+                        PROCESSING...
+                        } @else {
+                        PAY ${{ item!.price / 100 }}
+                        }
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    }
+
+
+    }
+</div>

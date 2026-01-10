@@ -1,0 +1,72 @@
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="brand-title">Adscentials</h1>
+      <p class="auth-subtitle">Welcome back! Please sign in to continue.</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="error-alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="login()" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          id="email" 
+          type="email" 
+          formControlName="email" 
+          placeholder="you@example.com"
+          autocomplete="email"
+        >
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <span class="field-error">Valid email is required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          id="password" 
+          type="password" 
+          formControlName="password" 
+          placeholder="••••••••"
+          autocomplete="current-password"
+        >
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <span class="field-error">Password must be at least 6 characters</span>
+        }
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || isLoading()">
+        @if (isLoading()) {
+          <span class="spinner"></span>
+        } @else {
+          Sign In
+        }
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>OR</span>
+    </div>
+
+    <div class="social-actions">
+      <button type="button" class="btn-outline" (click)="googleParams()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+      </button>
+      
+      <button type="button" class="btn-ghost" (click)="anonLogin()">
+        Browse as Guest
+      </button>
+    </div>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/entry/signup">Create one</a></p>
+    </div>
+  </div>
+</div>

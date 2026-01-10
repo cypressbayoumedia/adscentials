@@ -1,0 +1,182 @@
+<div class="orders-container">
+
+    <!-- TABS -->
+    <nav class="orders-tabs">
+        <button [class.active]="activeTab() === 'active'" (click)="toggleTab('active')">ACTIVE</button>
+        <button [class.active]="activeTab() === 'completed'" (click)="toggleTab('completed')">COMPLETED</button>
+        <button [class.active]="activeTab() === 'rejected'" (click)="toggleTab('rejected')">REJECTED</button>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="orders-content">
+        @switch (activeTab()) {
+
+        <!-- ACTIVE TAB -->
+        @case ('active') {
+        <section class="order-section">
+            <h3 class="section-title">
+                Active <span class="text-ad-pink">Orders</span>
+            </h3>
+            <div class="order-list">
+                @for (booking of activeOrders(); track booking.bookingId) {
+                <div class="order-card">
+                    <!-- Left Column: Status, Price, Actions -->
+                    <div class="order-left-col">
+                        <div>
+                            <div class="status-badge" [ngClass]="{
+                                        'pending': booking.status === 'confirmed',
+                                        'approved': booking.status === 'approved'
+                                    }">
+                                {{ booking.status === 'confirmed' ? 'PENDING' : booking.status }}
+                            </div>
+                            <h4 class="price-display">${{ booking.displayPrice || '---' }}</h4>
+                            <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
+
+                            @if (booking.status === 'confirmed') {
+                            @let expiry = getExpiryStatus(booking.createdAt);
+                            @if (expiry && !expiry.expired) {
+                            <div class="expiry-warning" [class.expiry-urgent]="expiry.isUrgent">
+                                ⚠️ {{ expiry.text }}
+                            </div>
+                            }
+                            }
+                        </div>
+
+                        <div class="actions-area">
+                            @if (booking.status === 'confirmed') {
+                            <div class="action-buttons">
+                                <button (click)="approveBooking(booking.bookingId)" class="btn-approve">Approve
+                                    Order</button>
+                                <button (click)="declineBooking(booking)" class="btn-refund">Reject & Refund</button>
+                            </div>
+                            }
+
+                            @if (booking.status === 'approved') {
+                            <div class="verify-container">
+                                <label class="verify-label">PROOF OF POST</label>
+                                <div class="verify-input-group">
+                                    <input type="text" #verifyInput placeholder="https://..."
+                                        [value]="booking.verificationUrl || ''">
+                                    <button class="btn-verify"
+                                        (click)="saveVerification(booking.bookingId, verifyInput.value)">
+                                        SEND
+                                    </button>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Brand, Script, Notes -->
+                    <div class="order-right-col">
+                        <div class="brand-row">
+                            <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
+                            <a [href]="booking.submission.targetUrl" target="_blank" class="visit-link">
+                                VISIT WEBSITE ↗
+                            </a>
+                        </div>
+
+                        <div class="script-container">
+                            <div class="script-header">
+                                <span>SCRIPT_READ_V1.TXT</span>
+                                <button (click)="copyScript(booking.submission.script)" class="btn-copy-script">
+                                    COPY SCRIPT
+                                </button>
+                            </div>
+                            <p class="script-content">"{{ booking.submission.script }}"</p>
+                        </div>
+
+                        @if (booking.submission.instructions) {
+                        <div class="notes-section">
+                            <span class="notes-label">NOTES:</span>
+                            {{ booking.submission.instructions }}
+                        </div>
+                        }
+                    </div>
+                </div>
+                } @empty {
+                <div class="empty-state">
+                    <p>NO ACTIVE ORDERS</p>
+                </div>
+                }
+            </div>
+        </section>
+        }
+
+        <!-- COMPLETED TAB -->
+        @case ('completed') {
+        <section class="order-section">
+            <h3 class="section-title">
+                Completed <span class="text-ad-cyan">History</span>
+            </h3>
+            <div class="order-list">
+                @for (booking of completedOrders(); track booking.bookingId) {
+                <div class="order-card completed-card">
+                    <div class="order-left-col">
+                        <div>
+                            <div class="status-badge completed">COMPLETED</div>
+                            <h4 class="price-display">${{ booking.displayPrice || '---' }}</h4>
+                            <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
+                        </div>
+                        <div class="actions-area">
+                            <div class="verify-result">
+                                <span class="material-symbols-rounded icon-verified">check_circle</span>
+                                <a [href]="booking.verificationUrl" target="_blank" class="link-proof">View Proof ↗</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-right-col">
+                        <div class="brand-row">
+                            <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
+                        </div>
+                        <div class="script-container disabled">
+                            <p class="script-content text-muted">"{{ booking.submission.script }}"</p>
+                        </div>
+                    </div>
+                </div>
+                } @empty {
+                <div class="empty-state">
+                    <p>NO COMPLETED ORDERS</p>
+                </div>
+                }
+            </div>
+        </section>
+        }
+
+        <!-- REJECTED TAB -->
+        @case ('rejected') {
+        <section class="order-section">
+            <h3 class="section-title">
+                Rejected <span class="text-muted">Archive</span>
+            </h3>
+            <div class="order-list">
+                @for (booking of rejectedOrders(); track booking.bookingId) {
+                <div class="order-card rejected-card">
+                    <div class="order-left-col">
+                        <div>
+                            <div class="status-badge rejected">REJECTED</div>
+                            <h4 class="price-display">${{ booking.displayPrice || '---' }}</h4>
+                            <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
+                        </div>
+                    </div>
+                    <div class="order-right-col">
+                        <div class="brand-row">
+                            <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
+                        </div>
+                        <div class="script-container disabled">
+                            <p class="script-content text-muted">"{{ booking.submission.script }}"</p>
+                        </div>
+                    </div>
+                </div>
+                } @empty {
+                <div class="empty-state">
+                    <p>NO REJECTED ORDERS</p>
+                </div>
+                }
+            </div>
+        </section>
+        }
+
+        }
+    </div>
+</div>

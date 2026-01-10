@@ -1,0 +1,142 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>DASHBOARD</h1>
+        <div class="user-info">
+            <button class="btn-icon" (click)="copyLink()" title="Copy Profile Link">
+                @if (linkCopied()) {
+                <span class="material-symbols-rounded icon-success">check_circle</span>
+                } @else {
+                <span class="material-symbols-rounded">link</span>
+                }
+            </button>
+            <a routerLink="/settings" class="btn-icon" title="Settings">
+                <span class="material-symbols-rounded">settings</span>
+            </a>
+            <button class="btn-small btn-secondary" (click)="signOut()">SIGN OUT</button>
+
+            @if (!user()?.stripeConnected) {
+            <button class="btn-small btn-stripe" (click)="connectStripe()" [disabled]="isLoadingStripe()">
+                @if (isLoadingStripe()) {
+                <span class="spinner"></span> Connecting...
+                } @else {
+                CONNECT PAYOUTS
+                }
+            </button>
+            } @else {
+            @if (user()?.stripeRestricted) {
+            <span class="badge-restricted">RESTRICTED</span>
+            } @else {
+            <span class="badge-verified">PAYOUTS ACTIVE</span>
+            }
+            }
+            <span>{{ user()?.displayName || 'CREATOR' }}</span>
+            <img [src]="user()?.photoURL" class="avatar-small">
+        </div>
+    </header>
+
+    <nav class="dashboard-tabs">
+        <button [class.active]="activeTab() === 'slots'" (click)="toggleTab('slots')">INVENTORY</button>
+        <button [class.active]="activeTab() === 'templates'" (click)="toggleTab('templates')">TEMPLATES</button>
+        <button [class.active]="activeTab() === 'orders'" (click)="toggleTab('orders')">ORDERS</button>
+    </nav>
+
+    <main class="dashboard-content">
+        @switch (activeTab()) {
+        @case ('slots') {
+        <div class="slot-list">
+            @for (slot of slots(); track slot.slotId) {
+            <div class="slot-row" [class.sold]="slot.status === 'sold'">
+                <div class="slot-date">{{ slot.date.toDate() | date:'MMM d' }}</div>
+                <div class="slot-details">
+                    <span class="platform-badge" [attr.data-platform]="slot.platform">{{ slot.platform | uppercase
+                        }}</span>
+                    <span class="type">{{ slot.type }}</span>
+                </div>
+                <div class="slot-price">${{ slot.price / 100 }}</div>
+                <div class="slot-status">{{ slot.status | uppercase }}</div>
+            </div>
+            } @empty {
+            <div class="empty-state">
+                <p>NO SLOTS CONFIGURED</p>
+            </div>
+            }
+        </div>
+        }
+        @case ('templates') {
+        <div class="template-list">
+            @for (temp of templates(); track temp.templateId) {
+            <div class="slot-row template-row">
+                <div class="slot-details">
+                    <div class="template-name">{{ temp.name }}</div>
+                    <span class="platform-badge" [attr.data-platform]="temp.platform">{{ temp.platform | uppercase
+                        }}</span>
+                    <span class="type">{{ temp.type }}</span>
+                </div>
+                <div class="actions">
+                    <button class="btn-small" (click)="applyTemplate(temp)">USE</button>
+                    <button class="btn-small btn-danger" (click)="deleteTemplate(temp.templateId)">DEL</button>
+                </div>
+            </div>
+            } @empty {
+            <p>NO TEMPLATES SAVED</p>
+            }
+        </div>
+        }
+        @case ('orders') {
+        <app-orders [bookings]="bookings()" [slots]="slots()" (refreshData)="user() ? loadData(user()!.uid) : null">
+        </app-orders>
+        }
+        }
+    </main>
+
+    <!-- FAB -->
+    <button class="fab-add" (click)="openAddSlot()">
+        <span class="material-symbols-rounded">add</span>
+    </button>
+
+    <!-- ADD SLOT DRAWER -->
+    @if (showAddSlotDrawer()) {
+    <div class="drawer-backdrop" (click)="closeAddSlot()">
+        <div class="drawer" (click)="$event.stopPropagation()">
+            <h2>ADD INVENTORY</h2>
+
+            <form [formGroup]="addSlotForm" (ngSubmit)="saveSlot()">
+                <div class="field-group">
+                    <label>TITLE</label>
+                    <input type="text" formControlName="title"
+                        placeholder="e.g. Podcast Shoutout, Billboard, Newsletter Feature">
+                </div>
+
+                <div class="field-group">
+                    <label>DESCRIPTION (OPTIONAL)</label>
+                    <textarea formControlName="description" placeholder="Describe the placement..."></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label>PRICE ($)</label>
+                    <input type="number" formControlName="price">
+                </div>
+
+                <div class="field-group">
+                    <label>DATE</label>
+                    <input type="date" formControlName="date">
+                </div>
+
+                <div class="field-checkbox">
+                    <input type="checkbox" formControlName="saveAsTemplate" id="saveTemplate">
+                    <label for="saveTemplate">SAVE AS TEMPLATE</label>
+                </div>
+
+                @if (addSlotForm.get('saveAsTemplate')?.value) {
+                <div class="field-group">
+                    <label>TEMPLATE NAME</label>
+                    <input type="text" formControlName="templateName">
+                </div>
+                }
+
+                <button type="submit" class="btn-primary" [disabled]="addSlotForm.invalid">SAVE SLOT</button>
+            </form>
+        </div>
+    </div>
+    }
+</div>

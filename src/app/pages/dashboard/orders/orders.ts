@@ -1,0 +1,142 @@
+
+import { Component, computed, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Firestore, doc, updateDoc } from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
+import { AdSlot, Booking } from '../../../core/models';
+
+@Component({
+  selector: 'app-orders',
+  imports: [CommonModule],
+  templateUrl: './orders.html',
+  styleUrls: ['./orders.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class OrdersComponent {
+  private firestore = inject(Firestore);
+  private functions = inject(Functions);
+
+  // Inputs
+  bookings = input.required<Booking[]>();
+  slots = input.required<AdSlot[]>();
+
+  // Outputs
+  refreshData = output<void>();
+
+  // State
+  activeTab = signal<'active' | 'completed' | 'rejected'>('active');
+  isProcessing = signal(false);
+
+  // Computed
+  bookingsView = computed(() => {
+    const slots = this.slots();
+    return this.bookings().map(booking => {
+      const slot = slots.find(s => s.slotId === booking.slotId);
+      return {
+        ...booking,
+        displayPrice: slot ? slot.price / 100 : null
+      };
+    });
+  });
+
+  activeOrders = computed(() => {
+    return this.bookingsView().filter(b => ['confirmed', 'approved', 'pending_approval'].includes(b.status));
+  });
+
+  completedOrders = computed(() => {
+    return this.bookingsView().filter(b => b.status === 'completed');
+  });
+
+  rejectedOrders = computed(() => {
+    return this.bookingsView().filter(b => b.status === 'rejected');
+  });
+
+  // Actions
+  toggleTab(tab: 'active' | 'completed' | 'rejected') {
+    this.activeTab.set(tab);
+  }
+
+  async approveBooking(bookingId: string) {
+    try {
+      this.isProcessing.set(true);
+      const approveFn = httpsCallable(this.functions, 'approveBooking');
+      await approveFn({ bookingId });
+      alert('Order approved and payment captured!');
+      this.refreshData.emit();
+    } catch (err: any) {
+      console.error('Error approving booking', err);
+      alert('Failed to approve booking: ' + (err.message || 'Unknown error'));
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+
+  async declineBooking(booking: Booking) {
+    if (!confirm('Are you sure you want to decline this booking? This will refund the sponsor 100% and release the slot back to the market.')) return;
+
+    this.isProcessing.set(true);
+    const declineFn = httpsCallable(this.functions, 'declineBooking');
+
+    try {
+      await declineFn({ bookingId: booking.bookingId });
+      alert('Booking declined and refunded.');
+      this.refreshData.emit();
+    } catch (err: any) {
+      console.error('Decline error', err);
+      alert('Failed to decline booking: ' + err.message);
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+
+  async saveVerification(bookingId: string, url: string) {
+    if (!url) return;
+    try {
+      const bookingRef = doc(this.firestore, 'bookings', bookingId);
+      await updateDoc(bookingRef, {
+        verificationUrl: url,
+        status: 'completed'
+      });
+      alert('Verification link saved and order completed!');
+      this.refreshData.emit();
+    } catch (err) {
+      console.error('Error saving verification', err);
+      alert('Failed to save link.');
+    }
+  }
+
+  copyScript(script: string) {
+    navigator.clipboard.writeText(script).then(() => {
+      alert('Script copied to clipboard!');
+    });
+  }
+
+  getExpiryStatus(createdAt: any) {
+    if (!createdAt) return null;
+
+    const created = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+    const now = new Date();
+    const expiresAt = new Date(created.getTime() + (7 * 24 * 60 * 60 * 1000));
+    const diffMs = expiresAt.getTime() - now.getTime();
+
+    if (diffMs <= 0) {
+      return { expired: true, text: 'EXPIRED', isUrgent: true };
+    }
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    let text = '';
+    if (days > 0) {
+      text = `Expires in ${days} day${days === 1 ? '' : 's'}`;
+    } else {
+      text = `Expires in ${hours} hour${hours === 1 ? '' : 's'}`;
+    }
+
+    return {
+      expired: false,
+      text,
+      isUrgent: days < 2
+    };
+  }
+}

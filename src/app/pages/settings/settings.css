@@ -1,0 +1,195 @@
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+.btn-icon {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.settings-card {
+    background: white;
+    border: 3px solid black;
+    padding: 2rem;
+    box-shadow: 4px 4px 0px black;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.btn-stripe-portal {
+    width: 100%;
+    padding: 1rem;
+    background: #635bff;
+    color: white;
+    border: 3px solid black;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px black;
+    transition: all 0.2s ease;
+}
+
+.btn-stripe-portal:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px black;
+}
+
+.btn-stripe-portal:active:not(:disabled) {
+    transform: translate(0, 0);
+    box-shadow: 2px 2px 0px black;
+}
+
+.profile-preview {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid black;
+    object-fit: cover;
+}
+
+.profile-info h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.profile-info p {
+    margin: 0.25rem 0 0;
+    color: #666;
+}
+
+.handle {
+    font-weight: 700;
+    color: black !important;
+}
+
+@media (max-width: 600px) {
+    .settings-container {
+        padding: 1rem;
+    }
+}
+
+/* Bio Section Styles */
+.bio-section {
+    margin-top: 1.5rem;
+    border-top: 2px dashed #ccc;
+    padding-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.bio-section label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.bio-section textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 3px solid black;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    resize: vertical;
+    box-shadow: 3px 3px 0px black;
+    transition: all 0.2s ease;
+}
+
+.bio-section textarea:focus {
+    outline: none;
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px black;
+}
+
+.bio-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.char-count {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.btn-save {
+    padding: 0.5rem 1rem;
+    background: black;
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-save:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    color: #888;
+}
+
+.status-message {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #00bf63;
+    /* Success Green */
+    margin: 0;
+    margin-top: 0.5rem;
+}
+
+.status-message.error {
+    color: #ff3b3b;
+    /* Error Red */
+}

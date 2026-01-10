@@ -1,34 +1,45 @@
 import { Injectable, inject, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { 
-  Auth, 
-  authState, 
-  signOut, 
-  user, 
-  updateProfile, 
-  updateEmail, 
-  deleteUser, 
-  EmailAuthProvider, 
-  linkWithCredential 
+import {
+  Auth,
+  authState,
+  signOut,
+  user,
+  updateProfile,
+  updateEmail,
+  deleteUser,
+  EmailAuthProvider,
+  linkWithCredential,
+  signInWithPopup,
+  signInAnonymously,
+  linkWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  User as FireUser
 } from '@angular/fire/auth';
-import { 
-  Firestore, 
-  doc, 
-  docData, 
-  setDoc, 
-  updateDoc 
+import {
+  Firestore,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc
 } from '@angular/fire/firestore';
-import { switchMap, of, catchError } from 'rxjs';
-//import { Snacks } from './snacks'; // Assuming path
+import { switchMap, of, catchError, Observable } from 'rxjs';
+
 import { User } from './user'; // Keeping your import
 
 // Define a stricter type for what we save to Firestore
 export interface UserProfile extends User {
   uid: string;
   photoURL?: string | null;
+  displayName?: string | null;
   email?: string | null;
+  stripeConnected?: boolean;
+  stripeRestricted?: boolean;
   createdAt?: string;
+  bio?: string | null;
 }
 
 @Injectable({
@@ -39,7 +50,7 @@ export class AuthService {
   private readonly auth = inject(Auth);
   private readonly firestore = inject(Firestore);
   private readonly router = inject(Router);
-  //private readonly snack = inject(Snacks);
+
 
   // 2. State Management via Signals
   // 'user' from @angular/fire/auth returns an observable of the auth state
@@ -47,13 +58,20 @@ export class AuthService {
 
   // Combine Auth State with Firestore Data
   // We explicitly type the Observable stream to ensure safety
-  readonly user$ = this.authUser$.pipe(
+  readonly user$: Observable<UserProfile | null> = this.authUser$.pipe(
     switchMap((firebaseUser) => {
       if (!firebaseUser) return of(null);
-      
+
       // Real-time listener to the Firestore user document
-      return docData(doc(this.firestore, 'users', firebaseUser.uid)) as any; 
-      // Note: Cast as 'any' or your specific 'User' type if docData infers incorrectly
+      // Using direct onSnapshot to avoid issues with docData helper
+      return new Observable<UserProfile>((observer) => {
+        const ref = doc(this.firestore, 'users', firebaseUser.uid);
+        const unsubscribe = onSnapshot(ref, {
+          next: (snap) => observer.next(snap.data() as UserProfile),
+          error: (err) => observer.error(err)
+        });
+        return unsubscribe; // Cleanup on unsubscribe
+      });
     }),
     catchError((err) => {
       console.error('Auth Error:', err);
@@ -71,14 +89,78 @@ export class AuthService {
 
   // 3. Actions using Async/Await
 
-  async setUserData(firebaseUser: any): Promise<void> {
+  async login(email: string, pass: string): Promise<void> {
+    const credential = await signInWithEmailAndPassword(this.auth, email, pass);
+    await this.setUserData(credential.user);
+    // No explicit navigation needed if used in component that handles it, 
+    // but consistent behavior suggests we might want to let component handle routing or do it here.
+    // My LoginComponent handles routing. I'll just return void.
+  }
+
+  async signup(email: string, pass: string): Promise<void> {
+    const credential = await createUserWithEmailAndPassword(this.auth, email, pass);
+    await this.setUserData(credential.user);
+    // Signup usually redirects to onboarding or home. Component will handle.
+  }
+
+  async googleSignin(): Promise<void> {
+    const provider = new GoogleAuthProvider();
+    try {
+      const credential = await signInWithPopup(this.auth, provider);
+      await this.setUserData(credential.user);
+      // Removed automatic navigation
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+    }
+  }
+
+  async anonymousLogin(): Promise<void> {
+    try {
+      const credential = await signInAnonymously(this.auth);
+      await this.setUserData(credential.user);
+      // Removed automatic navigation
+    } catch (error) {
+      console.error('Anonymous Login Error:', error);
+    }
+  }
+
+  async upgradeToGoogle(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const provider = new GoogleAuthProvider();
+
+    try {
+      const credential = await linkWithPopup(user, provider);
+      await this.setUserData(credential.user);
+      // No navigation needed, staying on same context usually
+    } catch (error) {
+      console.error('Error linking Google account:', error);
+    }
+  }
+
+  async upgradeToEmail(email: string, password: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    try {
+      const credential = EmailAuthProvider.credential(email, password);
+      await linkWithCredential(user, credential);
+      await this.setUserData(user);
+    } catch (error) {
+      console.error('Error linking Email account:', error);
+    }
+  }
+
+  async setUserData(firebaseUser: FireUser): Promise<void> {
     if (!firebaseUser) return;
 
     const userRef = doc(this.firestore, `users/${firebaseUser.uid}`);
-    
+
     const userData: UserProfile = {
       uid: firebaseUser.uid,
       photoURL: firebaseUser.photoURL,
+      displayName: firebaseUser.displayName,
       email: firebaseUser.email,
       // Add other default fields here
     };
@@ -87,7 +169,38 @@ export class AuthService {
       await setDoc(userRef, userData, { merge: true });
     } catch (error) {
       console.error('Error setting user data:', error);
-    //  this.snack.show_message('Failed to save user data.');
+    }
+  }
+
+  async updateUserDoc(data: Partial<UserProfile>): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    try {
+      const userRef = doc(this.firestore, `users/${user.uid}`);
+      await updateDoc(userRef, data);
+    } catch (error) {
+      console.error('Error updating user doc:', error);
+      throw error;
+    }
+  }
+
+  async updateProfile(data: { displayName?: string; photoURL?: string }): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    try {
+      await updateProfile(user, data);
+      // Refresh user data from the auth state to ensure we have the latest properties
+      if (this.auth.currentUser) {
+        await this.setUserData(this.auth.currentUser);
+      }
+
+      const userRef = doc(this.firestore, `users/${user.uid}`);
+      await updateDoc(userRef, data);
+    } catch (error) {
+      console.error('Update Profile Error:', error);
+      throw error;
     }
   }
 
@@ -98,17 +211,12 @@ export class AuthService {
     try {
       // 1. Update Auth Profile (so it shows up immediately in some auth contexts)
       await updateProfile(user, { photoURL });
-      
+
       // 2. Update Firestore Document (so it persists in your DB)
       const userRef = doc(this.firestore, 'users', user.uid);
       await updateDoc(userRef, { photoURL });
-
-     // this.snack.show_message('pfp Saved!');
-      // Best practice: Don't force navigation in service unless necessary
-      // this.router.navigate(['/home']); 
     } catch (error) {
       console.error(error);
-    //  this.snack.show_message("Can't save pfp");
     }
   }
 
@@ -118,20 +226,17 @@ export class AuthService {
 
     try {
       await updateEmail(user, newEmail);
-     // this.snack.show_message('Email Updated!');
     } catch (error) {
       console.error(error);
-    //  this.snack.show_message("Can't update email. You may need to re-login.");
     }
   }
 
   async signOut(): Promise<void> {
     try {
       await signOut(this.auth);
-     // this.snack.show_message('Signed out');
-      this.router.navigate(['/']);
+      this.router.navigate(['/entry/login']);
     } catch (error) {
-     // this.snack.show_message("Can't sign out");
+      console.error(error);
     }
   }
 
@@ -143,10 +248,8 @@ export class AuthService {
     try {
       const credential = EmailAuthProvider.credentialWithLink(email, window.location.href);
       await linkWithCredential(user, credential);
-      //this.snack.show_message('Account linked successfully');
     } catch (error) {
       console.error(error);
-      //this.snack.show_message('Re-authentication failed');
     }
   }
 
@@ -154,21 +257,24 @@ export class AuthService {
     const user = this.auth.currentUser;
     if (!user) return;
 
-    // Note: 'confirm' blocks the thread. Consider using a custom UI dialog.
-    if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-      return;
-    }
-
     try {
       // Optional: Delete Firestore data first if security rules allow
       // await deleteDoc(doc(this.firestore, 'users', user.uid));
-      
+
       await deleteUser(user);
-     // this.snack.show_message('Account deleted');
-      this.router.navigate(['/']);
+      this.router.navigate(['/entry/login']);
     } catch (error) {
       console.error(error);
-      //this.snack.show_message('Delete failed. You may need to re-login first.');
+    }
+  }
+
+
+  async reloadUser(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (user) {
+      await user.reload();
+      // Force update our local signal/stream if needed, though onSnapshot handles Firestore part.
+      // This is mainly to get fresh claims/token if needed.
     }
   }
 

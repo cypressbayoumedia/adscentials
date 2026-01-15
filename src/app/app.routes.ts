@@ -10,8 +10,7 @@ const redirectLoggedInToDashboard = () => redirectLoggedInTo(['dashboard']);
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'entry/login',
-        pathMatch: 'full'
+        loadComponent: () => import('./pages/landing/landing').then(m => m.LandingComponent)
     },
     {
         path: 'entry',

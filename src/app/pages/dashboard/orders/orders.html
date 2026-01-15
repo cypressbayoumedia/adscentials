@@ -92,6 +92,15 @@
                     <div class="order-right-col">
                         <div class="brand-row">
                             <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
+                            @if (booking.submission.logoUrl) {
+                            <div class="brand-logo-container">
+                                <img [src]="booking.submission.logoUrl" alt="Brand Logo" class="brand-logo-preview">
+                                <a [href]="booking.submission.logoUrl" target="_blank" download
+                                    class="btn-download-logo" title="Download Logo">
+                                    <span class="material-symbols-rounded">download</span>
+                                </a>
+                            </div>
+                            }
                             <a [href]="booking.submission.targetUrl" target="_blank" class="visit-link">
                                 VISIT WEBSITE ↗
                             </a>

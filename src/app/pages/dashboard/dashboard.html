@@ -59,9 +59,23 @@
             <div class="slot-row" [class.sold]="slot.status === 'sold'">
                 <div class="slot-date">{{ slot.date.toDate() | date:'MMM d' }}</div>
                 <div class="slot-details">
+                    <div class="slot-title">{{ slot.title }}</div>
+                    <div class="slot-desc">{{ slot.description || 'No description' }}</div>
                 </div>
-                <div class="slot-price">${{ slot.price / 100 }}</div>
-                <div class="slot-status">{{ slot.status | uppercase }}</div>
+                <div class="slot-meta">
+                    <div class="slot-price">${{ slot.price / 100 }}</div>
+                    <div class="slot-status-chip" [class]="slot.status">{{ slot.status | uppercase }}</div>
+                </div>
+                <div class="slot-actions">
+                    <button class="btn-icon-small" (click)="openAddSlot(slot)" title="Edit">
+                        <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    @if (slot.status === 'available') {
+                    <button class="btn-icon-small btn-danger" (click)="deleteSlot(slot.slotId)" title="Delete">
+                        <span class="material-symbols-rounded">delete</span>
+                    </button>
+                    }
+                </div>
             </div>
             } @empty {
             <div class="empty-state">
@@ -74,17 +88,32 @@
         <div class="template-list">
             @for (temp of templates(); track temp.templateId) {
             <div class="slot-row template-row">
-                <div class="slot-details">
-                    <div class="template-name">{{ temp.name }}</div>
-
+                <div class="slot-date template-icon">
+                    <span class="material-symbols-rounded">bookmark</span>
                 </div>
-                <div class="actions">
-                    <button class="btn-small" (click)="applyTemplate(temp)">USE</button>
-                    <button class="btn-small btn-danger" (click)="deleteTemplate(temp.templateId)">DEL</button>
+                <div class="slot-details">
+                    <div class="slot-title">{{ temp.name }}</div>
+                    <div class="slot-desc">{{ temp.title }} - {{ temp.description || 'No description' }}</div>
+                </div>
+                <div class="slot-meta">
+                    <div class="slot-price">${{ temp.price / 100 }}</div>
+                </div>
+                <div class="slot-actions">
+                    <button class="btn-icon-small" (click)="applyTemplate(temp)" title="Use Template">
+                        <span class="material-symbols-rounded">add_circle</span>
+                    </button>
+                    <button class="btn-icon-small" (click)="openEditTemplate(temp)" title="Edit Template">
+                        <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    <button class="btn-icon-small btn-danger" (click)="deleteTemplate(temp.templateId)" title="Delete">
+                        <span class="material-symbols-rounded">delete</span>
+                    </button>
                 </div>
             </div>
             } @empty {
-            <p>NO TEMPLATES SAVED</p>
+            <div class="empty-state">
+                <p>NO TEMPLATES SAVED</p>
+            </div>
             }
         </div>
         }
@@ -104,7 +133,7 @@
     @if (showAddSlotDrawer()) {
     <div class="drawer-backdrop" (click)="closeAddSlot()">
         <div class="drawer" (click)="$event.stopPropagation()">
-            <h2>ADD INVENTORY</h2>
+            <h2>{{ editingTemplate() ? 'EDIT TEMPLATE' : (editingSlot() ? 'EDIT SLOT' : 'ADD INVENTORY') }}</h2>
 
             <form [formGroup]="addSlotForm" (ngSubmit)="saveSlot()">
                 <div class="field-group">
@@ -123,24 +152,30 @@
                     <input type="number" formControlName="price">
                 </div>
 
-                <div class="field-group">
-                    <label>DATE</label>
-                    <input type="date" formControlName="date">
-                </div>
-
+                @if (!editingTemplate()) {
                 <div class="field-checkbox">
                     <input type="checkbox" formControlName="saveAsTemplate" id="saveTemplate">
                     <label for="saveTemplate">SAVE AS TEMPLATE</label>
                 </div>
+                }
 
-                @if (addSlotForm.get('saveAsTemplate')?.value) {
+                @if (addSlotForm.get('saveAsTemplate')?.value || editingTemplate()) {
                 <div class="field-group">
                     <label>TEMPLATE NAME</label>
                     <input type="text" formControlName="templateName">
                 </div>
                 }
 
-                <button type="submit" class="btn-primary" [disabled]="addSlotForm.invalid">SAVE SLOT</button>
+                @if (!editingTemplate()) {
+                <div class="field-group">
+                    <label>DATE</label>
+                    <input type="date" formControlName="date">
+                </div>
+                }
+
+                <button type="submit" class="btn-primary" [disabled]="addSlotForm.invalid && !editingTemplate()">
+                    {{ editingSlot() || editingTemplate() ? 'UPDATE' : 'SAVE SLOT' }}
+                </button>
             </form>
         </div>
     </div>

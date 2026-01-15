@@ -108,59 +108,146 @@ export class Dashboard implements OnInit {
     this.inventory.getBookings(uid).subscribe(bookings => this.bookings.set(bookings));
   }
 
-  openAddSlot() {
+  editingSlot = signal<AdSlot | null>(null);
+  editingTemplate = signal<SlotTemplate | null>(null);
+
+  openAddSlot(slot?: AdSlot) {
     if (!this.user()?.stripeConnected) {
       alert('You must connect your payouts before adding inventory.');
       return;
     }
 
-    this.addSlotForm.reset({
-      price: 50
+    this.editingTemplate.set(null); // Ensure template edit is cleared
+
+    if (slot) {
+      this.editingSlot.set(slot);
+      const dateStr = slot.date.toDate().toISOString().split('T')[0];
+
+      this.addSlotForm.patchValue({
+        title: slot.title,
+        description: slot.description || '',
+        price: slot.price / 100,
+        date: dateStr,
+        saveAsTemplate: false,
+        templateName: ''
+      });
+      // Date is required for slots
+      this.addSlotForm.get('date')?.enable();
+    } else {
+      this.editingSlot.set(null);
+      this.addSlotForm.reset({
+        price: 50,
+        date: new Date().toISOString().split('T')[0]
+      });
+      this.addSlotForm.get('date')?.enable();
+    }
+
+    this.showAddSlotDrawer.set(true);
+  }
+
+  openEditTemplate(template: SlotTemplate) {
+    this.editingTemplate.set(template);
+    this.editingSlot.set(null);
+
+    this.addSlotForm.patchValue({
+      title: template.title,
+      description: template.description || '',
+      price: template.price / 100,
+      templateName: template.name,
+      date: new Date().toISOString().split('T')[0] // Dummy date to satisfy validator if needed, or disable validator
     });
+
+    // key: We are editing a template, so date is irrelevant.
+    this.addSlotForm.get('date')?.disable();
+
     this.showAddSlotDrawer.set(true);
   }
 
   async saveSlot() {
-    if (this.addSlotForm.invalid) return;
+    // If we are editing a template, date is disabled so form might be invalid if we don't handle it.
+    // If date is disabled, it is excluded from validation in some angular versions, but let's be safe.
+    if (this.addSlotForm.invalid && !this.editingTemplate()) return;
+    // If editing template, check validity excluding date? Or just ensure date is present if form requires it.
+    // Actually, if control is disabled, it shouldn't trigger validation failure for required.
 
-    const val = this.addSlotForm.value;
+    const val = this.addSlotForm.getRawValue(); // Get all values including disabled
     const uid = this.user()?.uid;
+    const editingSlotId = this.editingSlot()?.slotId;
+    const editingTemplateId = this.editingTemplate()?.templateId;
 
-    if (!uid || !val.date) return;
+    if (!uid) return;
 
     try {
-      // Use logic from InventoryService which saves to 'adSlots' collection
-      await this.inventory.createSlot({
-        creatorId: uid,
-        date: new Date(val.date), // Pass Date object, service handles it
-        title: val.title!,
-        description: val.description || undefined,
-        price: Math.round(val.price! * 100),
-        status: 'available'
-      });
+      // 1. EDITING EXISTING TEMPLATE
+      if (editingTemplateId) {
+        if (!val.templateName || !val.title || !val.price) return; // Custom validation
 
-      if (val.saveAsTemplate && val.templateName) {
-        await this.inventory.createTemplate({
-          creatorId: uid,
+        await this.inventory.updateTemplate(editingTemplateId, {
           name: val.templateName,
+          title: val.title,
+          description: val.description || undefined,
+          price: Math.round(val.price * 100),
+          creatorId: uid
+        });
+      }
+      // 2. SAVING/UPDATING SLOT
+      else {
+        if (!val.date) return;
+
+        const slotData = {
+          date: new Date(val.date),
           title: val.title!,
           description: val.description || undefined,
           price: Math.round(val.price! * 100),
-        });
+        };
+
+        if (editingSlotId) {
+          // Type cast existing
+          await this.inventory.updateSlot(editingSlotId, slotData as any);
+        } else {
+          await this.inventory.createSlot({
+            creatorId: uid,
+            ...slotData,
+            status: 'available'
+          });
+        }
+
+        // 3. IF SAVING AS NEW TEMPLATE (During slot creation)
+        if (val.saveAsTemplate && val.templateName) {
+          await this.inventory.createTemplate({
+            creatorId: uid,
+            name: val.templateName,
+            title: val.title!,
+            description: val.description || undefined,
+            price: Math.round(val.price! * 100),
+          });
+        }
       }
 
       this.closeAddSlot();
-      // No need to manually reload, loadData subscriptions are real-time
-      // But we can call it if we want to be sure? 
-      // Actually loadData sets up subscriptions. We don't need to call it again.
-      // The subscriptions from ngOnInit/loadData will catch the new slot.
+
     } catch (err) {
-      console.error('Error saving slot', err);
+      console.error('Error saving', err);
     }
   }
 
   closeAddSlot() {
     this.showAddSlotDrawer.set(false);
+    this.editingSlot.set(null);
+    this.editingTemplate.set(null);
+    this.addSlotForm.reset();
+    this.addSlotForm.get('date')?.enable();
+  }
+
+  async deleteSlot(slotId: string) {
+    if (!confirm('Are you sure you want to delete this slot? This action cannot be undone.')) return;
+
+    try {
+      await this.inventory.deleteSlot(slotId);
+    } catch (err) {
+      console.error('Error deleting slot:', err);
+      alert('Failed to delete slot');
+    }
   }
 
   applyTemplate(template: SlotTemplate) {
@@ -169,11 +256,9 @@ export class Dashboard implements OnInit {
       description: template.description,
       price: template.price / 100
     });
-    // Optionally switch to add slot view directly?
-    // For now just notify or assume they go to add slot.
-    // Better: Open add slot drawer with these values.
+
     this.openAddSlot();
-    // Patch again because openAddSlot resets form
+
     this.addSlotForm.patchValue({
       title: template.title,
       description: template.description,

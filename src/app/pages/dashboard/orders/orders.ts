@@ -119,6 +119,26 @@ export class OrdersComponent {
     });
   }
 
+  async downloadImage(url: string) {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = 'brand-logo'; // Default filename, browser might detect extension
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      console.error('Download failed', err);
+      // Fallback to opening in new tab
+      window.open(url, '_blank');
+    }
+  }
+
   getExpiryStatus(createdAt: any) {
     if (!createdAt) return null;
 

@@ -15,7 +15,7 @@ export class InventoryService {
         const q = query(
             slotsRef,
             where('creatorId', '==', creatorId),
-            orderBy('date', 'asc')
+            orderBy('date', 'desc')
         );
         // Using snapshot listener for consistency
         return new Observable<AdSlot[]>(observer => {
@@ -38,6 +38,23 @@ export class InventoryService {
 
         await setDoc(newDocRef, { ...slot, date: finalDate, slotId: newDocRef.id });
         return newDocRef.id;
+    }
+
+    async updateSlot(slotId: string, data: Partial<AdSlot>) {
+        const slotRef = doc(this.firestore, 'adSlots', slotId);
+
+        // Handle date conversion if present
+        const updateData: any = { ...data };
+        if (updateData.date && typeof updateData.date === 'string') {
+            updateData.date = new Date(updateData.date);
+        }
+
+        await setDoc(slotRef, updateData, { merge: true });
+    }
+
+    async deleteSlot(slotId: string) {
+        const slotRef = doc(this.firestore, 'adSlots', slotId);
+        await deleteDoc(slotRef);
     }
 
     // Templates
@@ -77,6 +94,11 @@ export class InventoryService {
         // We set templateId in the data for redundancy, but the query populates it from doc.id too
         await setDoc(newDocRef, { ...template, templateId: newDocRef.id });
         return newDocRef.id;
+    }
+
+    async updateTemplate(templateId: string, data: Partial<SlotTemplate>) {
+        const ref = doc(this.firestore, 'slotTemplates', templateId);
+        await setDoc(ref, data, { merge: true });
     }
 
     async deleteTemplate(templateId: string) {

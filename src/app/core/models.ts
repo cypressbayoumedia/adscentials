@@ -16,18 +16,14 @@ export interface Creator {
     };
 }
 
-export type SlotPlatform = 'podcast' | 'newsletter' | 'tiktok' | 'youtube' | 'twitter' | 'instagram' | 'other';
-export type SlotType = 'shoutout' | 'mid-roll' | 'newsletter_blurb' | 'post' | 'story' | 'mention';
 export type SlotStatus = 'available' | 'pending' | 'sold' | 'completed';
 
 export interface SlotTemplate {
     templateId: string;
     creatorId: string;
     name: string;
-    title: string;       // NEW
-    description?: string; // NEW
-    platform: SlotPlatform;
-    type: SlotType;
+    title: string;
+    description?: string;
     price: number;
 }
 
@@ -37,8 +33,6 @@ export interface AdSlot {
     date: Timestamp;
     title: string;       // NEW: Custom title
     description?: string; // NEW: Custom description
-    platform: SlotPlatform; // Legacy/Categorization
-    type: SlotType;         // Legacy/Categorization
     price: number; // in cents
     status: SlotStatus;
     reservedUntil?: Timestamp;

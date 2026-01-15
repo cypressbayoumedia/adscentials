@@ -1,5 +1,6 @@
 
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
@@ -22,6 +23,8 @@ export class Storefront implements OnInit {
   private inventory = inject(InventoryService);
   private functions = inject(Functions);
   private auth = inject(AuthService);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
 
   isLoading = signal(true);
   error = signal<string | null>(null);
@@ -100,6 +103,9 @@ export class Storefront implements OnInit {
         this.userProfile.set(userData);
         // Load slots for this creator
         this.loadSlots(uid);
+
+        // Update SEO
+        this.updateMetaTags(userData);
       } else {
         this.error.set('User profile not found');
         this.isLoading.set(false);
@@ -170,5 +176,31 @@ export class Storefront implements OnInit {
     }
   }
 
+  updateMetaTags(user: UserProfile) {
+    const name = user.displayName || 'Adscentials Creator';
+    const month = new Date().toLocaleString('default', { month: 'long' });
+    const title = `${month} Ad Slots | ${name}`;
+    const description = `Purchase ad inventory directly from ${name}. Limited spots available for ${month}. Secure your placement today.`;
+    const image = user.photoURL || 'https://adscentials.web.app/assets/icons/icon-512x512.png';
+
+    // Set Title
+    this.titleService.setTitle(title);
+
+    // Set Meta Tags
+    this.metaService.updateTag({ name: 'description', content: description });
+
+    // Open Graph
+    this.metaService.updateTag({ property: 'og:title', content: title });
+    this.metaService.updateTag({ property: 'og:description', content: description });
+    this.metaService.updateTag({ property: 'og:image', content: image });
+    this.metaService.updateTag({ property: 'og:url', content: window.location.href });
+    this.metaService.updateTag({ property: 'og:type', content: 'website' });
+
+    // Twitter
+    this.metaService.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+    this.metaService.updateTag({ name: 'twitter:title', content: title });
+    this.metaService.updateTag({ name: 'twitter:description', content: description });
+    this.metaService.updateTag({ name: 'twitter:image', content: image });
+  }
 }
 

@@ -4,12 +4,13 @@ import { Timestamp } from "firebase-admin/firestore";
 import Stripe from "stripe";
 import { db } from "../init";
 import { stripeSecret, stripeWebhookSecret, getStripe } from "./config";
+import { vetScript, geminiApiKey } from "../ai/vetting";
 
 /**
  * 3. Stripe Webhook
  * Listens for checkout.session.completed to fulfill order
  */
-export const stripeWebhook = onRequest({ secrets: [stripeSecret, stripeWebhookSecret] }, async (req, res) => {
+export const stripeWebhook = onRequest({ secrets: [stripeSecret, stripeWebhookSecret, geminiApiKey] }, async (req, res) => {
     const sig = req.headers['stripe-signature'];
     const endpointSecret = stripeWebhookSecret.value();
     const stripe = getStripe();
@@ -69,7 +70,31 @@ export const stripeWebhook = onRequest({ secrets: [stripeSecret, stripeWebhookSe
                     batch.update(slotRef, { status: 'sold' });
 
                     await batch.commit();
+
                     logger.info(`Fulfilling booking ${bookingId} for slot ${slotId}`);
+
+                    // ---------------------------------------------------------
+                    // AI VETTING (Post-Commit to ensure Booking exists/is confirm)
+                    // ---------------------------------------------------------
+                    try {
+                        // refetch to get the script
+                        const bookingSnap = await bookingRef.get();
+                        const bookingData = bookingSnap.data();
+
+                        if (bookingData && bookingData.submission && bookingData.submission.script) {
+                            logger.info(`Starting AI Vetting for ${bookingId}`);
+                            const vettingResult = await vetScript(bookingData.submission.script);
+
+                            // Update the doc with AI result
+                            await bookingRef.update({
+                                aiVetting: vettingResult
+                            });
+                            logger.info(`AI Vetting Completed for ${bookingId}: Score ${vettingResult.safetyScore}`);
+                        }
+                    } catch (aiErr) {
+                        logger.error('Error during AI Vetting', aiErr);
+                        // Don't fail the webhook response, just log it.
+                    }
                 } catch (error) {
                     logger.error('Error updating Firestore in Webhook', error);
                     res.status(500).send('Firestore Error');

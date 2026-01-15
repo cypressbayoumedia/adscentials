@@ -457,3 +457,48 @@
         padding: 10px;
     }
 }
+/* AI VETTING BADGE */
+.script-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vetting-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 2px solid #000;
+    font-weight: 900;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    background: #e6fffa;
+    white-space: nowrap;
+}
+
+.vetting-badge.flagged {
+    background: #fff5f5;
+    border-color: #ff0000;
+    color: #ff0000;
+}
+
+.vetting-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+@media (max-width: 768px) {
+    .script-header-actions {
+        flex-direction: column;
+        width: 100%;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .vetting-badge {
+        justify-content: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

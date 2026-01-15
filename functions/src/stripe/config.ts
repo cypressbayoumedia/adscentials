@@ -1,8 +1,8 @@
 import { defineSecret } from "firebase-functions/params";
 import Stripe from "stripe";
 
-export const stripeSecret = defineSecret("STRIPE_SECRET");
-export const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+export const stripeSecret = defineSecret("STRIPE_TEST_SECRET");
+export const stripeWebhookSecret = defineSecret("STRIPE_TEST_WEBHOOK_SECRET");
 
 export const getStripe = () => {
     return new Stripe(stripeSecret.value(), {

@@ -2,7 +2,7 @@
     @if (isLoading()) {
     <div class="loading-state">
         <div class="spinner"></div>
-        <p>LOADING VENDING MACHINE...</p>
+        <p>Loading Storefront...</p>
     </div>
     } @else if (error()) {
     <div class="error-state">
@@ -24,12 +24,7 @@
         </div>
     </header>
 
-    <!-- SOCIAL TICKER -->
-    <!-- <div class="social-ticker-container">
-        <div class="ticker-wrap">
-            <div class="ticker-item">{{ tickerText() }}</div>
-        </div>
-    </div> -->
+
 
     <!-- VENDING GRID -->
     <div class="vending-grid">
@@ -51,12 +46,10 @@
             <div class="card-body">
 
             </div>
-            <h2>{{ slot.title || ((slot.platform + ' ' + slot.type) | uppercase) }}</h2>
+            <h2>{{ slot.title | uppercase }}</h2>
             @if (slot.description) {
             <p>{{ slot.description }}</p>
-            } @else {
-            <p>{{ slot.platform | titlecase }} Placement</p>
-            }
+            } 
             <button class="btn-buy" [disabled]="slot.status !== 'available'" (click)="openCheckout(slot)">
                 {{ slot.status === 'sold' ? 'SOLD OUT' : 'SECURE THIS SPOT' }}
             </button>
@@ -79,7 +72,7 @@
             </div>
             <div class="drawer-content">
                 <div class="summary-card">
-                    <h3>{{ item!.title || (item!.type | uppercase) }} - {{ item!.date.toDate() | date:'shortDate' }}
+                    <h3>{{ item!.title }} - {{ item!.date.toDate() | date:'shortDate' }}
                     </h3>
                     <p>Total: ${{ item!.price / 100 }}</p>
                 </div>

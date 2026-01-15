@@ -4,7 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventoryService } from '../../core/inventory';
 import { AuthService } from '../../core/auth';
 import { Firestore, collection, doc, setDoc, Timestamp } from '@angular/fire/firestore';
-import { AdSlot, SlotTemplate, SlotPlatform, SlotType, Booking } from '../../core/models';
+import { MessagingService } from '../../core/messaging';
+import { AdSlot, SlotTemplate, Booking } from '../../core/models';
 import { Router, ActivatedRoute } from '@angular/router'; // Added ActivatedRoute
 import { Functions, httpsCallable } from '@angular/fire/functions';
 
@@ -26,6 +27,7 @@ export class Dashboard implements OnInit {
   private fb = inject(FormBuilder);
   private functions = inject(Functions);
   private firestore = inject(Firestore);
+  private messaging = inject(MessagingService);
 
   user = this.auth.currentUser;
   slots = signal<AdSlot[]>([]);
@@ -54,6 +56,8 @@ export class Dashboard implements OnInit {
     const currentUser = this.user();
     if (currentUser) {
       this.loadData(currentUser.uid);
+      // Auto-request notification permissions
+      this.messaging.requestPermission();
     }
 
     // Check for success param
@@ -111,8 +115,6 @@ export class Dashboard implements OnInit {
         date: new Date(val.date), // Pass Date object, service handles it
         title: val.title!,
         description: val.description || undefined,
-        platform: 'other',
-        type: 'shoutout',
         price: Math.round(val.price! * 100),
         status: 'available'
       });
@@ -123,8 +125,6 @@ export class Dashboard implements OnInit {
           name: val.templateName,
           title: val.title!,
           description: val.description || undefined,
-          platform: 'other',
-          type: 'shoutout',
           price: Math.round(val.price! * 100),
         });
       }

@@ -79,9 +79,24 @@
                         <div class="script-container">
                             <div class="script-header">
                                 <span>SCRIPT_READ_V1.TXT</span>
-                                <button (click)="copyScript(booking.submission.script)" class="btn-copy-script">
-                                    COPY SCRIPT
-                                </button>
+                                <div class="script-header-actions">
+                                    @if (booking.aiVetting) {
+                                    <div class="vetting-badge" [class.flagged]="booking.aiVetting.flagged">
+                                        @if (booking.aiVetting.flagged) {
+                                        <span class="vetting-icon">⚠️</span>
+                                        <span class="vetting-text">AI WARNING ({{ booking.aiVetting.safetyScore
+                                            }}/100)</span>
+                                        } @else {
+                                        <span class="vetting-icon">✨</span>
+                                        <span class="vetting-text">AI VERIFIED SAFE ({{ booking.aiVetting.safetyScore
+                                            }}/100)</span>
+                                        }
+                                    </div>
+                                    }
+                                    <button (click)="copyScript(booking.submission.script)" class="btn-copy-script">
+                                        COPY SCRIPT
+                                    </button>
+                                </div>
                             </div>
                             <p class="script-content">"{{ booking.submission.script }}"</p>
                         </div>

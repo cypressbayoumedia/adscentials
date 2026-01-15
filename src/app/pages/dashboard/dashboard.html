@@ -48,9 +48,6 @@
             <div class="slot-row" [class.sold]="slot.status === 'sold'">
                 <div class="slot-date">{{ slot.date.toDate() | date:'MMM d' }}</div>
                 <div class="slot-details">
-                    <span class="platform-badge" [attr.data-platform]="slot.platform">{{ slot.platform | uppercase
-                        }}</span>
-                    <span class="type">{{ slot.type }}</span>
                 </div>
                 <div class="slot-price">${{ slot.price / 100 }}</div>
                 <div class="slot-status">{{ slot.status | uppercase }}</div>
@@ -68,9 +65,7 @@
             <div class="slot-row template-row">
                 <div class="slot-details">
                     <div class="template-name">{{ temp.name }}</div>
-                    <span class="platform-badge" [attr.data-platform]="temp.platform">{{ temp.platform | uppercase
-                        }}</span>
-                    <span class="type">{{ temp.type }}</span>
+
                 </div>
                 <div class="actions">
                     <button class="btn-small" (click)="applyTemplate(temp)">USE</button>

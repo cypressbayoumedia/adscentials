@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, doc, setDoc, deleteDoc, query, where, getDocs, orderBy, Timestamp, addDoc, onSnapshot } from '@angular/fire/firestore';
 import { Observable, from, map } from 'rxjs';
-import { AdSlot, SlotPlatform, SlotType, SlotTemplate, Booking } from './models';
+import { AdSlot, SlotTemplate, Booking } from './models';
 
 @Injectable({
     providedIn: 'root'

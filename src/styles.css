@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=Inter+Tight:wght@600;800&display=swap');
+
+:root {
+    /* Soft Brutalism System */
+    --border-radius-soft: 16px;
+    --border-radius-btn: 12px;
+    --border-width: 2px;
+    --shadow-soft: 4px 4px 0px #000;
+    --shadow-hover: 6px 6px 0px #000;
+    --color-bg-soft: #F9FAFB;
+    --font-heading: 'Inter Tight', sans-serif;
+    --font-body: 'Inter', sans-serif;
+
+    /* Brand Colors */
+    --color-highlight: #FDE047;
+    /* Yellow */
+    --color-cyan: #67E8F9;
+    /* Cyan */
+    --color-pink: #FF4ea7;
+    /* Ad-Pink */
+}
 
 /* Global Styles */
 body {

@@ -45,9 +45,24 @@
                         <div class="actions-area">
                             @if (booking.status === 'confirmed') {
                             <div class="action-buttons">
-                                <button (click)="approveBooking(booking.bookingId)" class="btn-approve">Approve
-                                    Order</button>
-                                <button (click)="declineBooking(booking)" class="btn-refund">Reject & Refund</button>
+                                <button (click)="approveBooking(booking.bookingId)" class="btn-approve"
+                                    [disabled]="processingAction()">
+                                    @if (processingAction()?.id === booking.bookingId &&
+                                    processingAction()?.type === 'approve') {
+                                    Approving...
+                                    } @else {
+                                    APPROVE ORDER
+                                    }
+                                </button>
+                                <button (click)="declineBooking(booking)" class="btn-refund"
+                                    [disabled]="processingAction()">
+                                    @if (processingAction()?.id === booking.bookingId &&
+                                    processingAction()?.type === 'decline') {
+                                    Declining...
+                                    } @else {
+                                    REJECT & REFUND
+                                    }
+                                </button>
                             </div>
                             }
 
@@ -58,8 +73,14 @@
                                     <input type="text" #verifyInput placeholder="https://..."
                                         [value]="booking.verificationUrl || ''">
                                     <button class="btn-verify"
-                                        (click)="saveVerification(booking.bookingId, verifyInput.value)">
+                                        (click)="saveVerification(booking.bookingId, verifyInput.value)"
+                                        [disabled]="processingAction()">
+                                        @if (processingAction()?.id === booking.bookingId &&
+                                        processingAction()?.type === 'verify') {
+                                        ...
+                                        } @else {
                                         SEND
+                                        }
                                     </button>
                                 </div>
                             </div>

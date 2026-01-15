@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventoryService } from '../../core/inventory';
@@ -28,6 +28,26 @@ export class Dashboard implements OnInit {
   private functions = inject(Functions);
   private firestore = inject(Firestore);
   private messaging = inject(MessagingService);
+
+  // Toast State
+  toastMessage = signal<{ title: string; body: string } | null>(null);
+
+  constructor() {
+    effect(() => {
+      const msg = this.messaging.currentMessage();
+      if (msg && msg.notification) {
+        this.toastMessage.set({
+          title: msg.notification.title || 'New Notification',
+          body: msg.notification.body || ''
+        });
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+          this.toastMessage.set(null);
+        }, 5000);
+      }
+    });
+  }
 
   user = this.auth.currentUser;
   slots = signal<AdSlot[]>([]);

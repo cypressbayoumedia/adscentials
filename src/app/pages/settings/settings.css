@@ -1,29 +1,55 @@
+:host {
+    display: block;
+    background-color: var(--color-bg-soft);
+    font-family: var(--font-body);
+    min-height: 100vh;
+}
+
 .settings-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
-    min-height: 100vh;
 }
 
 .settings-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
     margin-bottom: 3rem;
 }
 
 .btn-icon {
     font-size: 1.5rem;
-    background: none;
-    border: none;
+    background: #fff;
+    border: var(--border-width) solid #000;
     cursor: pointer;
     padding: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 2px 2px 0 #000;
+}
+
+.btn-icon:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #000;
+}
+
+.btn-icon:active {
+    transform: translate(0, 0);
+    box-shadow: 0 0 0 #000;
 }
 
 h1 {
-    font-size: 2rem;
-    font-weight: 900;
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 800;
     margin: 0;
+    letter-spacing: -1px;
 }
 
 .settings-content {
@@ -34,22 +60,33 @@ h1 {
 
 .settings-card {
     background: white;
-    border: 3px solid black;
+    border: var(--border-width) solid #000;
+    border-radius: var(--border-radius-soft);
     padding: 2rem;
-    box-shadow: 4px 4px 0px black;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s;
+}
+
+.settings-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 h2 {
+    font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 800;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     text-transform: uppercase;
+    letter-spacing: -0.5px;
 }
 
 .description {
-    color: #666;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
+    color: #555;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    max-width: 600px;
 }
 
 .btn-stripe-portal {
@@ -57,91 +94,118 @@ h2 {
     padding: 1rem;
     background: #635bff;
     color: white;
-    border: 3px solid black;
-    font-weight: 800;
+    border: none;
+    border-radius: var(--border-radius-btn);
+    font-weight: 700;
+    font-family: var(--font-body);
     text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 4px 4px 0px black;
+    box-shadow: 0 4px 6px rgba(99, 91, 255, 0.3);
     transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
 .btn-stripe-portal:hover:not(:disabled) {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px black;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(99, 91, 255, 0.4);
 }
 
 .btn-stripe-portal:active:not(:disabled) {
-    transform: translate(0, 0);
-    box-shadow: 2px 2px 0px black;
+    transform: translateY(0);
 }
 
 .profile-preview {
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    margin-bottom: 2rem;
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: var(--border-radius-btn);
+    border: 1px solid #e5e5e5;
 }
 
 .avatar {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 3px solid black;
+    border: var(--border-width) solid #000;
     object-fit: cover;
+    background: #000;
 }
 
 .profile-info h3 {
     margin: 0;
     font-size: 1.25rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
 }
 
 .profile-info p {
     margin: 0.25rem 0 0;
     color: #666;
+    font-size: 0.95rem;
 }
 
 .handle {
     font-weight: 700;
-    color: black !important;
+    color: #000 !important;
+    background: #e6fffa;
+    padding: 2px 8px;
+    border-radius: 100px;
+    display: inline-block;
+    font-size: 0.85rem !important;
+    margin-top: 0.5rem !important;
 }
 
 @media (max-width: 600px) {
     .settings-container {
         padding: 1rem;
     }
+
+    .profile-preview {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
 /* Bio Section Styles */
 .bio-section {
     margin-top: 1.5rem;
-    border-top: 2px dashed #ccc;
-    padding-top: 1.5rem;
+    border-top: 2px solid #f3f4f6;
+    padding-top: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .bio-section label {
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.9rem;
+    color: #000;
 }
 
 .bio-section textarea {
     width: 100%;
-    padding: 0.75rem;
-    border: 3px solid black;
+    padding: 1rem;
+    border: 2px solid #e5e5e5;
+    border-radius: var(--border-radius-btn);
     font-family: inherit;
     font-size: 1rem;
     font-weight: 500;
     resize: vertical;
-    box-shadow: 3px 3px 0px black;
     transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
 .bio-section textarea:focus {
     outline: none;
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px black;
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 .bio-footer {
@@ -152,44 +216,53 @@ h2 {
 }
 
 .char-count {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #666;
     font-weight: 600;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
 .btn-save {
-    padding: 0.5rem 1rem;
-    background: black;
+    padding: 12px 24px;
+    background: #000;
     color: white;
     font-weight: 700;
     border: none;
+    border-radius: var(--border-radius-btn);
     cursor: pointer;
     text-transform: uppercase;
     font-size: 0.9rem;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn-save:hover:not(:disabled) {
-    background: #333;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-save:disabled {
-    background: #ccc;
+    background: #e5e5e5;
     cursor: not-allowed;
-    color: #888;
+    color: #999;
+    box-shadow: none;
 }
 
 .status-message {
     font-size: 0.9rem;
     font-weight: 700;
-    color: #00bf63;
-    /* Success Green */
+    color: #166534;
+    background: #dcfce7;
+    padding: 10px;
+    border-radius: 8px;
     margin: 0;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
 }
 
 .status-message.error {
-    color: #ff3b3b;
-    /* Error Red */
+    color: #991b1b;
+    background: #fef2f2;
 }

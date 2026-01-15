@@ -28,10 +28,10 @@
 
     <!-- VENDING GRID -->
     <div class="vending-grid">
-        @for (slot of slots(); track slot.slotId) {
+        @for (slot of slots(); track slot.slotId; let i = $index) {
         <div class="vending-card" [ngClass]="{
-            'yellow': slot.status === 'available', 
-            'cyan': slot.status === 'available',
+            'yellow': slot.status === 'available' && i % 2 === 0, 
+            'cyan': slot.status === 'available' && i % 2 !== 0,
             'grey': slot.status === 'sold' || slot.status === 'completed'
         }">
             <div class="card-header">
@@ -44,12 +44,11 @@
                 }
             </div>
             <div class="card-body">
-
+                <h2>{{ slot.title }}</h2>
+                @if (slot.description) {
+                <p>{{ slot.description }}</p>
+                }
             </div>
-            <h2>{{ slot.title | uppercase }}</h2>
-            @if (slot.description) {
-            <p>{{ slot.description }}</p>
-            } 
             <button class="btn-buy" [disabled]="slot.status !== 'available'" (click)="openCheckout(slot)">
                 {{ slot.status === 'sold' ? 'SOLD OUT' : 'SECURE THIS SPOT' }}
             </button>

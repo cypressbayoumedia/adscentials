@@ -1,6 +1,8 @@
 <div class="settings-container">
     <header class="settings-header">
-        <button class="btn-icon" (click)="goBack()">←</button>
+        <button class="btn-icon" (click)="goBack()">
+            <span class="material-symbols-rounded">arrow_back</span>
+        </button>
         <h1>SETTINGS</h1>
     </header>
 
@@ -11,7 +13,7 @@
                 Manage your bank account details, view payout history, and access tax forms securely on Stripe.
             </p>
 
-            <button class="btn-primary btn-stripe-portal" (click)="openStripePortal()" [disabled]="isLoadingStripe()">
+            <button class="btn-stripe-portal" (click)="openStripePortal()" [disabled]="isLoadingStripe()">
                 @if (isLoadingStripe()) {
                 <span class="spinner"></span> Opening...
                 } @else {
@@ -43,7 +45,7 @@
                         @if (isSavingBio()) {
                         Saving...
                         } @else {
-                        Save Bio
+                        SAVE BIO
                         }
                     </button>
                 </div>

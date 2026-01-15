@@ -25,7 +25,7 @@ export class OrdersComponent {
 
   // State
   activeTab = signal<'active' | 'completed' | 'rejected'>('active');
-  isProcessing = signal(false);
+  processingAction = signal<{ id: string, type: 'approve' | 'decline' | 'verify' } | null>(null);
 
   // Computed
   bookingsView = computed(() => {
@@ -57,8 +57,10 @@ export class OrdersComponent {
   }
 
   async approveBooking(bookingId: string) {
+    if (this.processingAction()) return;
+
     try {
-      this.isProcessing.set(true);
+      this.processingAction.set({ id: bookingId, type: 'approve' });
       const approveFn = httpsCallable(this.functions, 'approveBooking');
       await approveFn({ bookingId });
       alert('Order approved and payment captured!');
@@ -67,14 +69,16 @@ export class OrdersComponent {
       console.error('Error approving booking', err);
       alert('Failed to approve booking: ' + (err.message || 'Unknown error'));
     } finally {
-      this.isProcessing.set(false);
+      this.processingAction.set(null);
     }
   }
 
   async declineBooking(booking: Booking) {
+    if (this.processingAction()) return;
+
     if (!confirm('Are you sure you want to decline this booking? This will refund the sponsor 100% and release the slot back to the market.')) return;
 
-    this.isProcessing.set(true);
+    this.processingAction.set({ id: booking.bookingId, type: 'decline' });
     const declineFn = httpsCallable(this.functions, 'declineBooking');
 
     try {
@@ -85,13 +89,15 @@ export class OrdersComponent {
       console.error('Decline error', err);
       alert('Failed to decline booking: ' + err.message);
     } finally {
-      this.isProcessing.set(false);
+      this.processingAction.set(null);
     }
   }
 
   async saveVerification(bookingId: string, url: string) {
-    if (!url) return;
+    if (!url || this.processingAction()) return;
+
     try {
+      this.processingAction.set({ id: bookingId, type: 'verify' });
       const bookingRef = doc(this.firestore, 'bookings', bookingId);
       await updateDoc(bookingRef, {
         verificationUrl: url,
@@ -102,6 +108,8 @@ export class OrdersComponent {
     } catch (err) {
       console.error('Error saving verification', err);
       alert('Failed to save link.');
+    } finally {
+      this.processingAction.set(null);
     }
   }
 

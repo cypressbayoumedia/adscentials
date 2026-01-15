@@ -49,6 +49,19 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/settings/settings').then(m => m.Settings)
     },
     {
+        path: 'legal',
+        children: [
+            {
+                path: 'terms',
+                loadComponent: () => import('./pages/legal/terms').then(m => m.Terms)
+            },
+            {
+                path: 'privacy',
+                loadComponent: () => import('./pages/legal/privacy').then(m => m.Privacy)
+            }
+        ]
+    },
+    {
         path: ':handle',
         loadComponent: () => import('./pages/storefront/storefront').then(m => m.Storefront)
     }

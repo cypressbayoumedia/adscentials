@@ -1,4 +1,15 @@
 <div class="dashboard-container">
+
+    <!-- TOAST NOTIFICATION -->
+    @if (toastMessage()) {
+    <div class="toast-notification" (click)="toastMessage.set(null)">
+        <div class="toast-content">
+            <h4 class="toast-title">{{ toastMessage()?.title }}</h4>
+            <p class="toast-body">{{ toastMessage()?.body }}</p>
+        </div>
+        <button class="toast-close">×</button>
+    </div>
+    }
     <header class="dashboard-header">
         <h1>DASHBOARD</h1>
         <div class="user-info">

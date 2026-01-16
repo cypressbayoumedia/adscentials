@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { Routes } from '@angular/router';
+import { Routes, Router } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 import { onboardingGuard } from './core/onboarding.guard';
 
@@ -38,8 +38,8 @@ export const routes: Routes = [
     },
     {
         path: 'home',
-        canActivate: [onboardingGuard],
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
     },
     {
         path: 'dashboard',
@@ -51,6 +51,13 @@ export const routes: Routes = [
         canActivate: [onboardingGuard],
         loadComponent: () => import('./pages/settings/settings').then(m => m.Settings)
     },
+
+    {
+        path: 'orders',
+        canActivate: [() => inject(Router).createUrlTree(['/dashboard'], { queryParams: { tab: 'orders' } })],
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+    },
+
     {
         path: 'legal',
         children: [

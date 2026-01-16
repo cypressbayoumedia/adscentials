@@ -57,7 +57,7 @@ export class MailService {
       <h1>New Order Received!</h1>
       <p>You have received a new order from <strong>${orderDetails.sponsorName}</strong>.</p>
       <p>Product: ${orderDetails.productName}</p>
-      <p>Price: ${orderDetails.price / 100}</p>
+      <p>Price: ${orderDetails.price}</p>
       <p><a href="https://adscentials.com/dashboard/orders">View Order</a></p>
     `;
         await this.sendEmail(creatorEmail, subject, text, html);

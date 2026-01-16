@@ -171,6 +171,16 @@
                     <label>DATE</label>
                     <input type="date" formControlName="date">
                 </div>
+
+                <div class="field-group">
+                    <label>REPEAT</label>
+                    <select formControlName="repeatWeeks"
+                        style="width: 100%; padding: 12px; border: 2px solid #000; font-family: 'Space Mono', monospace; font-weight: bold; background: #fff;">
+                        <option [ngValue]="0">Just One (No Repeat)</option>
+                        <option [ngValue]="3">4 Weeks (1 Month)</option>
+                        <option [ngValue]="7">8 Weeks (2 Months)</option>
+                    </select>
+                </div>
                 }
 
                 <button type="submit" class="btn-primary" [disabled]="addSlotForm.invalid && !editingTemplate()">

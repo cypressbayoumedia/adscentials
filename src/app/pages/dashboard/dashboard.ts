@@ -66,7 +66,8 @@ export class Dashboard implements OnInit {
     title: ['', Validators.required],
     description: [''],
     price: [null as number | null, [Validators.required, Validators.min(5)]],
-    date: [new Date().toISOString().split('T')[0], Validators.required],
+    date: [new Date().toLocaleDateString('en-CA'), Validators.required],
+    repeatWeeks: [0], // 0 = No repeat
     saveAsTemplate: [false],
     templateName: ['']
   });
@@ -80,21 +81,26 @@ export class Dashboard implements OnInit {
       this.messaging.requestPermission();
     }
 
-    // Check for success param
+    // Check for success param and tab param
     this.route.queryParams.subscribe(async params => {
+      // 1. Success Flow
       if (params['stripe_connect'] === 'success') {
-        // Manually verify status as failsafe for webhook
         try {
           const verifyFn = httpsCallable(this.functions, 'verifyStripeConnection');
           await verifyFn();
-          // Reload user data to get new claims/status
           await this.auth.reloadUser();
         } catch (err) {
           console.error('Verification failed', err);
         }
-
-        // Clean URL
         this.router.navigate([], { relativeTo: this.route, queryParams: { stripe_connect: null }, queryParamsHandling: 'merge' });
+      }
+
+      // 2. Tab Deep Linking
+      if (params['tab']) {
+        const tab = params['tab'];
+        if (['slots', 'templates', 'orders'].includes(tab)) {
+          this.activeTab.set(tab as any);
+        }
       }
     });
   }
@@ -137,7 +143,8 @@ export class Dashboard implements OnInit {
       this.editingSlot.set(null);
       this.addSlotForm.reset({
         price: 50,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD in Local Time
+        repeatWeeks: 0
       });
       this.addSlotForm.get('date')?.enable();
     }
@@ -194,22 +201,53 @@ export class Dashboard implements OnInit {
       else {
         if (!val.date) return;
 
+        // FIX: Construct date in Local Time at Noon to prevent timezone shifts (UTC parsing causing 'previous day' display)
+        const [y, m, d] = val.date.split('-').map(Number);
+        const localDate = new Date(y, m - 1, d, 12, 0, 0); // Noon
+
         const slotData = {
-          date: new Date(val.date),
+          date: localDate,
           title: val.title!,
           description: val.description || undefined,
           price: Math.round(val.price! * 100),
         };
 
+
         if (editingSlotId) {
           // Type cast existing
           await this.inventory.updateSlot(editingSlotId, slotData as any);
         } else {
-          await this.inventory.createSlot({
-            creatorId: uid,
-            ...slotData,
-            status: 'available'
-          });
+          // Check for repeat
+          const repeatWeeks = val.repeatWeeks || 0;
+
+          if (repeatWeeks > 0) {
+            const slotsToCreate = [];
+            const baseDate = new Date(localDate); // Use the fixed local date
+
+            // Create initial slot (week 0) + repeats
+            for (let i = 0; i <= repeatWeeks; i++) {
+              // Create date for this iteration
+              const nextDate = new Date(baseDate);
+              nextDate.setDate(baseDate.getDate() + (i * 7));
+
+              slotsToCreate.push({
+                creatorId: uid,
+                ...slotData,
+                date: nextDate,
+                status: 'available'
+              });
+            }
+
+            await this.inventory.batchCreateSlots(slotsToCreate);
+
+          } else {
+            // Single creation
+            await this.inventory.createSlot({
+              creatorId: uid,
+              ...slotData,
+              status: 'available'
+            });
+          }
         }
 
         // 3. IF SAVING AS NEW TEMPLATE (During slot creation)

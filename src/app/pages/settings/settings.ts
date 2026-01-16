@@ -26,6 +26,24 @@ export class Settings {
     isSavingBio = signal(false);
     bioMessage = signal<string | null>(null);
 
+    linkCopied = signal(false);
+
+    get storefrontUrl(): string {
+        const handle = this.user()?.handle;
+        if (!handle) return '';
+        return `${window.location.origin}/${handle}`;
+    }
+
+    copyLink() {
+        const url = this.storefrontUrl;
+        if (!url) return;
+
+        navigator.clipboard.writeText(url).then(() => {
+            this.linkCopied.set(true);
+            setTimeout(() => this.linkCopied.set(false), 2000);
+        });
+    }
+
     constructor() {
         // Sync control with user data when it loads
         effect(() => {

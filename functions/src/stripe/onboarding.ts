@@ -30,6 +30,8 @@ export const createStripeAccountLink = onCall({ secrets: [stripeSecret] }, async
                 type: 'express',
                 country: 'US', // Default to US for MVP
                 email: userData?.email,
+                business_type: 'individual',
+                business_profile: { mcc: '7311' }, // Advertising Services
                 metadata: { firebaseUid: uid },
                 capabilities: {
                     card_payments: { requested: true },

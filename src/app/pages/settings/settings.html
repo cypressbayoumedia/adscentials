@@ -32,6 +32,21 @@
                     <p class="handle">@{{ user()?.handle }}</p>
                 </div>
             </div>
+            <!-- Storefront Link -->
+            <div class="storefront-link-section">
+                <label>Your Storefront Link</label>
+                <div class="storefront-link-box" (click)="copyLink()" title="Click to copy">
+                    <span class="link-text">{{ storefrontUrl }}</span>
+                    <button class="btn-icon-small">
+                        @if (linkCopied()) {
+                        <span class="material-symbols-rounded icon-success">check_circle</span>
+                        } @else {
+                        <span class="material-symbols-rounded">content_copy</span>
+                        }
+                    </button>
+                </div>
+            </div>
+
             <!-- Bio Edit Form -->
             <div class="bio-section">
                 <label for="bio">Bio</label>

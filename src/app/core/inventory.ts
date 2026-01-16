@@ -40,6 +40,29 @@ export class InventoryService {
         return newDocRef.id;
     }
 
+    async batchCreateSlots(slots: any[]) {
+        const batch = import('@angular/fire/firestore').then(m => m.writeBatch(this.firestore));
+        // Note: writeBatch is not directly exported from @angular/fire/firestore usually, it's from firebase/firestore
+        // But angular fire provides the instance.
+        // Let's use the Modular SDK pattern: writeBatch(firestore)
+        const { writeBatch } = await import('@angular/fire/firestore');
+        const batchOp = writeBatch(this.firestore);
+
+        slots.forEach(slot => {
+            const slotsRef = collection(this.firestore, 'adSlots');
+            const newDocRef = doc(slotsRef);
+
+            let finalDate = slot.date;
+            if (typeof slot.date === 'string') {
+                finalDate = new Date(slot.date);
+            }
+
+            batchOp.set(newDocRef, { ...slot, date: finalDate, slotId: newDocRef.id });
+        });
+
+        await batchOp.commit();
+    }
+
     async updateSlot(slotId: string, data: Partial<AdSlot>) {
         const slotRef = doc(this.firestore, 'adSlots', slotId);
 

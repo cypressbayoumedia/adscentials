@@ -63,7 +63,7 @@
                     <div class="slot-desc">{{ slot.description || 'No description' }}</div>
                 </div>
                 <div class="slot-meta">
-                    <div class="slot-price">${{ slot.price / 100 }}</div>
+                    <div class="slot-price">{{ slot.price / 100 | currency }}</div>
                     <div class="slot-status-chip" [class]="slot.status">{{ slot.status | uppercase }}</div>
                 </div>
                 <div class="slot-actions">
@@ -96,7 +96,7 @@
                     <div class="slot-desc">{{ temp.title }} - {{ temp.description || 'No description' }}</div>
                 </div>
                 <div class="slot-meta">
-                    <div class="slot-price">${{ temp.price / 100 }}</div>
+                    <div class="slot-price">{{ temp.price / 100 | currency }}</div>
                 </div>
                 <div class="slot-actions">
                     <button class="btn-icon-small" (click)="applyTemplate(temp)" title="Use Template">

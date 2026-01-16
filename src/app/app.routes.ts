@@ -9,8 +9,12 @@ const redirectLoggedInToDashboard = () => redirectLoggedInTo(['dashboard']);
 
 export const routes: Routes = [
     {
+        path: 'success',
+        loadComponent: () => import('./pages/success/success').then(m => m.Success)
+    },
+    {
         path: '',
-        loadComponent: () => import('./pages/landing/landing').then(m => m.LandingComponent)
+        loadComponent: () => import('./pages/landing/landing').then(m => m.Landing)
     },
     {
         path: 'entry',

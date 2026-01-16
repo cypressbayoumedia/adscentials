@@ -10,11 +10,11 @@ import { Router, ActivatedRoute } from '@angular/router'; // Added ActivatedRout
 import { Functions, httpsCallable } from '@angular/fire/functions';
 
 import { RouterModule } from '@angular/router';
-import { OrdersComponent } from './orders/orders';
+import { Orders } from './orders/orders';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, OrdersComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, Orders],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -9,4 +9,4 @@ import { RouterLink } from '@angular/router';
     templateUrl: './landing.html',
     styleUrls: ['./landing.css']
 })
-export class LandingComponent { }
+export class Landing { }

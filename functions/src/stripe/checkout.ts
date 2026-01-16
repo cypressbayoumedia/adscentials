@@ -68,8 +68,8 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
                 slotId: slotId,
                 sponsorId: sponsorId
             },
-            success_url: 'https://adscentials.web.app/dashboard', // Redirect to dashboard to see order
-            cancel_url: `https://adscentials.web.app/${creatorData.handle || 'storefront'}`,
+            success_url: 'https://adscentials.com/success?session_id={CHECKOUT_SESSION_ID}', // Redirect to success page
+            cancel_url: `https://adscentials.com/${creatorData.handle || 'storefront'}`,
         });
 
         // 6. Reserve Slot & Create Pending Booking
@@ -78,11 +78,27 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
         const reservedUntil = Timestamp.fromMillis(Date.now() + 15 * 60 * 1000);
         batch.update(slotRef, { status: 'pending', reservedUntil: reservedUntil });
 
+        // Fetch Sponsor Details for the name (if logged in)
+        let sponsorName = 'Guest Sponsor';
+        let sponsorEmail: string | undefined = undefined;
+
+        if (sponsorId !== 'guest') {
+            const sponsorDoc = await db.collection('users').doc(sponsorId).get();
+            const sponsorData = sponsorDoc.data();
+            sponsorName = sponsorData?.displayName || 'Sponsor';
+            sponsorEmail = sponsorData?.email;
+        }
+
         batch.set(bookingRef, {
             bookingId: bookingRef.id,
             slotId: slotId,
             creatorId: slot.creatorId,
+            creatorName: creatorData?.displayName || 'Creator', // Cache creator name
             sponsorId: sponsorId,
+            sponsorName: sponsorName,
+            sponsorEmail: sponsorEmail, // Undefined for guests initially, filled by webhook later
+            productTitle: slot.title || `${slot.platform.toUpperCase()} - ${slot.type} Ad`, // Cache product title
+            price: price, // Cache price
             stripeSessionId: session.id,
             status: 'pending_payment',
             submission: submission,

@@ -181,7 +181,7 @@ export class Storefront implements OnInit {
     const month = new Date().toLocaleString('default', { month: 'long' });
     const title = `${month} Ad Slots | ${name}`;
     const description = `Purchase ad inventory directly from ${name}. Limited spots available for ${month}. Secure your placement today.`;
-    const image = user.photoURL || 'https://adscentials.web.app/assets/icons/icon-512x512.png';
+    const image = user.photoURL || 'https://adscentials.com/assets/icons/icon-512x512.png';
 
     // Set Title
     this.titleService.setTitle(title);

@@ -64,7 +64,19 @@ export const stripeWebhook = onRequest({ secrets: [stripeSecret, stripeWebhookSe
                     const slotRef = db.collection('adSlots').doc(slotId);
 
                     // Update Booking
-                    batch.update(bookingRef, { status: 'confirmed', paidAt: Timestamp.now() });
+                    const updateData: any = { status: 'confirmed', paidAt: Timestamp.now() };
+
+                    // Capture Guest Details if available
+                    if (session.customer_details) {
+                        if (session.customer_details.email) {
+                            updateData.sponsorEmail = session.customer_details.email;
+                        }
+                        if (session.customer_details.name) {
+                            updateData.sponsorName = session.customer_details.name;
+                        }
+                    }
+
+                    batch.update(bookingRef, updateData);
 
                     // Update Slot
                     batch.update(slotRef, { status: 'sold' });

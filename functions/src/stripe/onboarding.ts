@@ -15,7 +15,7 @@ export const createStripeAccountLink = onCall({ secrets: [stripeSecret] }, async
     const stripe = getStripe();
 
     // Get origin for dynamic URLs
-    const origin = request.rawRequest.headers.origin || 'https://adscentials.web.app';
+    const origin = request.rawRequest.headers.origin || 'https://adscentials.com';
 
     try {
         // 2. Check if user already has a stripeAccountId

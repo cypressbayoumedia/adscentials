@@ -5,14 +5,17 @@ import { Firestore, doc, updateDoc } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { AdSlot, Booking } from '../../../core/models';
 
+import { CdkAccordionModule } from '@angular/cdk/accordion';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+
 @Component({
   selector: 'app-orders',
-  imports: [CommonModule],
+  imports: [CommonModule, CdkAccordionModule, ClipboardModule],
   templateUrl: './orders.html',
   styleUrls: ['./orders.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class OrdersComponent {
+export class Orders {
   private firestore = inject(Firestore);
   private functions = inject(Functions);
 
@@ -113,10 +116,12 @@ export class OrdersComponent {
     }
   }
 
-  copyScript(script: string) {
-    navigator.clipboard.writeText(script).then(() => {
+  onScriptCopied(success: boolean) {
+    if (success) {
       alert('Script copied to clipboard!');
-    });
+    } else {
+      alert('Failed to copy script.');
+    }
   }
 
   async downloadImage(url: string) {

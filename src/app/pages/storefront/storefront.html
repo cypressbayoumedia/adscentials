@@ -40,7 +40,7 @@
                 @if (slot.status === 'sold') {
                 <span class="price-tag">SOLD</span>
                 } @else {
-                <span class="price-tag">${{ slot.price / 100 }}</span>
+                <span class="price-tag">{{ slot.price / 100 | currency }}</span>
                 }
             </div>
             <div class="card-body">
@@ -73,7 +73,7 @@
                 <div class="summary-card">
                     <h3>{{ item!.title }} - {{ item!.date.toDate() | date:'shortDate' }}
                     </h3>
-                    <p>Total: ${{ item!.price / 100 }}</p>
+                    <p>Total: {{ item!.price / 100 | currency }}</p>
                 </div>
 
                 <form (ngSubmit)="purchase()">
@@ -101,7 +101,7 @@
                         @if (isProcessing()) {
                         PROCESSING...
                         } @else {
-                        PAY ${{ item!.price / 100 }}
+                        PAY {{ item!.price / 100 | currency }}
                         }
                     </button>
                 </form>

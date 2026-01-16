@@ -29,7 +29,7 @@
                                     }">
                                 {{ booking.status === 'confirmed' ? 'PENDING' : booking.status }}
                             </div>
-                            <h4 class="price-display">${{ booking.displayPrice || '---' }}</h4>
+                            <h4 class="price-display">{{ booking.displayPrice || '---' | currency}}</h4>
                             <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
 
                             @if (booking.status === 'confirmed') {
@@ -91,39 +91,60 @@
                     <!-- Right Column: Brand, Script, Notes -->
                     <div class="order-right-col">
                         <div class="brand-row">
-                            <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
-                            @if (booking.submission.logoUrl) {
-                            <div class="brand-logo-container">
+                            <!-- Left: Identity -->
+                            <div class="brand-identity">
+                                @if (booking.submission.logoUrl) {
                                 <img [src]="booking.submission.logoUrl" alt="Brand Logo" class="brand-logo-preview">
-                                <a [href]="booking.submission.logoUrl" target="_blank" download
-                                    class="btn-download-logo" title="Download Logo">
-                                    <span class="material-symbols-rounded">download</span>
-                                </a>
+                                }
+                                <h5 class="brand-name">{{ booking.sponsorName || 'SPONSOR' }}</h5>
                             </div>
-                            }
-                            <a [href]="booking.submission.targetUrl" target="_blank" class="visit-link">
-                                VISIT WEBSITE ↗
-                            </a>
+
+                            <!-- Right: Actions Accordion -->
+                            <cdk-accordion class="brand-actions-accordion">
+                                <cdk-accordion-item #item="cdkAccordionItem" class="accordion-item" [expanded]="false">
+                                    <div class="actions-trigger" (click)="item.toggle()"
+                                        [attr.aria-expanded]="item.expanded" aria-label="Toggle Actions Menu">
+                                        <span class="material-symbols-rounded"
+                                            [style.transform]="item.expanded ? 'rotate(180deg)' : 'rotate(0deg)'">
+                                            expand_more
+                                        </span>
+                                    </div>
+                                    <div class="actions-dropdown" [style.display]="item.expanded ? 'block' : 'none'">
+                                        @if (booking.submission.logoUrl) {
+                                        <a [href]="booking.submission.logoUrl" target="_blank" download
+                                            class="action-item">
+                                            <span class="material-symbols-rounded">download</span>
+                                            Download Logo
+                                        </a>
+                                        }
+                                        <a [href]="booking.submission.targetUrl" target="_blank" class="action-item">
+                                            <span class="material-symbols-rounded">open_in_new</span>
+                                            Visit Website
+                                        </a>
+                                    </div>
+                                </cdk-accordion-item>
+                            </cdk-accordion>
                         </div>
 
                         <div class="script-container">
                             <div class="script-header">
-                                <span>SCRIPT_READ_V1.TXT</span>
+                                <span>SCRIPT</span>
                                 <div class="script-header-actions">
                                     @if (booking.aiVetting) {
                                     <div class="vetting-badge" [class.flagged]="booking.aiVetting.flagged">
                                         @if (booking.aiVetting.flagged) {
                                         <span class="vetting-icon">⚠️</span>
-                                        <span class="vetting-text">AI WARNING ({{ booking.aiVetting.safetyScore
-                                            }}/100)</span>
+                                        <span class="vetting-text">({{ booking.aiVetting.safetyScore
+                                            |percent}} Maybe Unsafe)</span>
                                         } @else {
                                         <span class="vetting-icon">✨</span>
-                                        <span class="vetting-text">AI VERIFIED SAFE ({{ booking.aiVetting.safetyScore
-                                            }}/100)</span>
+                                        <span class="vetting-text">({{ booking.aiVetting.safetyScore
+                                           |percent}} Safe)</span>
                                         }
                                     </div>
                                     }
-                                    <button (click)="copyScript(booking.submission.script)" class="btn-copy-script">
+                                    <button [cdkCopyToClipboard]="booking.submission.script"
+                                        (cdkCopyToClipboardCopied)="onScriptCopied($event)" class="btn-copy-script">
                                         COPY SCRIPT
                                     </button>
                                 </div>
@@ -160,7 +181,7 @@
                     <div class="order-left-col">
                         <div>
                             <div class="status-badge completed">COMPLETED</div>
-                            <h4 class="price-display">${{ booking.displayPrice || '---' }}</h4>
+                            <h4 class="price-display">${{ booking.displayPrice || '---' | currency}}</h4>
                             <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
                         </div>
                         <div class="actions-area">
@@ -172,7 +193,7 @@
                     </div>
                     <div class="order-right-col">
                         <div class="brand-row">
-                            <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
+                            <h5 class="brand-name">{{booking.sponsorName || 'SPONSOR' }}</h5>
                         </div>
                         <div class="script-container disabled">
                             <p class="script-content text-muted">"{{ booking.submission.script }}"</p>
@@ -200,13 +221,13 @@
                     <div class="order-left-col">
                         <div>
                             <div class="status-badge rejected">REJECTED</div>
-                            <h4 class="price-display">${{ booking.displayPrice || '---' }}</h4>
+                            <h4 class="price-display">{{ booking.displayPrice || '---' | currency }}</h4>
                             <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
                         </div>
                     </div>
                     <div class="order-right-col">
                         <div class="brand-row">
-                            <h5 class="brand-name">{{ booking.submission.logoUrl ? 'BRAND' : 'SPONSOR' }}</h5>
+                            <h5 class="brand-name">{{booking.sponsorName || 'SPONSOR' }}</h5> 
                         </div>
                         <div class="script-container disabled">
                             <p class="script-content text-muted">"{{ booking.submission.script }}"</p>

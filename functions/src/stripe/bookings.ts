@@ -126,3 +126,40 @@ export const declineBooking = onCall({ secrets: [stripeSecret] }, async (request
         throw new HttpsError('internal', error.message);
     }
 });
+
+/**
+ * Fetch booking details by Stripe Session ID.
+ * This acts as a secure way for the success page to show order details without requiring login.
+ */
+export const getBookingBySession = onCall(async (request) => {
+    const { sessionId } = request.data;
+    if (!sessionId) {
+        throw new HttpsError('invalid-argument', 'Session ID is required.');
+    }
+
+    try {
+        const bookingsRef = db.collection('bookings');
+        const snapshot = await bookingsRef.where('stripeSessionId', '==', sessionId).limit(1).get();
+
+        if (snapshot.empty) {
+            throw new HttpsError('not-found', 'Booking not found for this session.');
+        }
+
+        const booking = snapshot.docs[0].data();
+
+        // Return only safe, necessary data
+        return {
+            bookingId: booking.bookingId,
+            status: booking.status,
+            productTitle: booking.productTitle,
+            price: booking.price,
+            creatorName: booking.creatorName,
+            creatorId: booking.creatorId, // Needed for "Shop More" link
+            createdAt: booking.createdAt?.toMillis() || Date.now()
+        };
+
+    } catch (error: any) {
+        logger.error("Get Booking By Session Error", error);
+        throw new HttpsError('internal', error.message);
+    }
+});

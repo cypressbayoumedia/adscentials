@@ -46,6 +46,7 @@ export interface BookingSubmission {
     logoUrl?: string;
     instructions?: string; // pronunciation, vibe, do's/don'ts
     attachments?: string[];
+    sponsorName?: string;
 }
 
 export interface AIVettingResult {
@@ -58,11 +59,16 @@ export interface Booking {
     bookingId: string;
     slotId: string;
     creatorId: string;
-    sponsorId: string; // Changed from sponsorEmail to match implementation
+    creatorName?: string; // Cache: for emails
+    sponsorId: string;
+    sponsorName?: string; // Cache: for emails
+    sponsorEmail?: string; // NEW: For guest checkout
+    productTitle?: string;// Cache: for emails
+    price?: number;       // Cache: for emails
     status: BookingStatus;
     submission: BookingSubmission;
     aiVetting?: AIVettingResult;
     stripeSessionId?: string;
-    verificationUrl?: string;
+    verificationUrl?: string; // proof of post link
     createdAt: Timestamp;
 }

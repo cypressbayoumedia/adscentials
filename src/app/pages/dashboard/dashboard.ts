@@ -143,7 +143,7 @@ export class Dashboard implements OnInit {
       this.editingSlot.set(null);
       this.addSlotForm.reset({
         price: 50,
-        date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD in Local Time
+        date: new Date().toLocaleDateString('en-US'), // YYYY-MM-DD in Local Time
         repeatWeeks: 0
       });
       this.addSlotForm.get('date')?.enable();

@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Storefront } from './storefront';
 import { ActivatedRoute } from '@angular/router';
-import { Firestore } from '@angular/fire/firestore';
+import { Firestore, Timestamp } from '@angular/fire/firestore';
 import { Functions } from '@angular/fire/functions';
 import { AuthService } from '../../core/auth';
 import { InventoryService } from '../../core/inventory';
@@ -64,8 +64,15 @@ describe('Storefront', () => {
     });
 
     it('should open checkout when item selected', () => {
-        // @ts-expect-error - Partial mock
-        const mockSlot = { slotId: '1', price: 1000 };
+
+        const mockSlot = {
+            slotId: '1',
+            creatorId: 'test_creator',
+            date: Timestamp.now(),
+            title: 'Test Slot',
+            price: 100,
+            status: 'available' as const
+        };
         component.openCheckout(mockSlot);
         expect(component.selectedItem()).toEqual(mockSlot);
     });

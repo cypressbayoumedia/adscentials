@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // --- Helper Functions ---
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user matches the userId in the path
+    function isUserPath(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // --- Rules ---
+
+    // User Media (Profile Pics, etc.)
+    // Path: /users/{userId}/*
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true; // Public for profile pictures
+      allow write: if isUserPath(userId);
+    }
+    
+    // Default Deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

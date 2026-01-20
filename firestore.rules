@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      // Use for checking existing resource (read, update, delete)
+      return isAuthenticated() && resource.data.creatorId == request.auth.uid;
+    }
+    
+    function isIncomingDocOwner() {
+      // Use for checking new resource (create, update)
+      return isAuthenticated() && request.resource.data.creatorId == request.auth.uid;
+    }
+
+    // --- Collection Rules ---
+
+    // Users Collection
+    // Public read for storefront profiles. Owner write for settings/bio.
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+    }
+
+    // Ad Slots
+    // Public read (Storefront). Creator write (Dashboard).
+    match /adSlots/{slotId} {
+      allow read: if true;
+      allow create: if isIncomingDocOwner();
+      allow update: if isDocOwner() && isIncomingDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // Slot Templates
+    // Private to Creator.
+    match /slotTemplates/{templateId} {
+      allow read: if isDocOwner(); // Or query filtering
+      allow create: if isIncomingDocOwner();
+      allow update: if isDocOwner() && isIncomingDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // Bookings
+    // Creator needs to read their bookings.
+    // Creation is typically handled by backend or authenticated flow.
+    match /bookings/{bookingId} {
+      allow read: if isDocOwner();
+      // Write access is restricted to backend (admin SDK bypasses rules)
+      allow write: if false; 
+    }
+  }
+}

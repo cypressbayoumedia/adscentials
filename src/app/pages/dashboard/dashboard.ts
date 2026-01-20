@@ -65,7 +65,7 @@ export class Dashboard implements OnInit {
   addSlotForm = this.fb.group({
     title: ['', Validators.required],
     description: [''],
-    price: [null as number | null, [Validators.required, Validators.min(5)]],
+    price: [null as number | null, [Validators.required, Validators.min(1)]],
     date: [new Date().toLocaleDateString('en-CA'), Validators.required],
     repeatWeeks: [0], // 0 = No repeat
     saveAsTemplate: [false],

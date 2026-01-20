@@ -387,3 +387,17 @@
         max-width: 100%;
     }
 }
+
+.legal-disclaimer {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+    margin-top: 1rem;
+    line-height: 1.4;
+}
+
+.legal-disclaimer a {
+    color: #000;
+    text-decoration: underline;
+    font-weight: 500;
+}

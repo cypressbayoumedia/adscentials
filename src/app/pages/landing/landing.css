@@ -14,6 +14,7 @@
     padding: 1.5rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    gap: 1rem;
 }
 
 .logo {
@@ -489,12 +490,20 @@
 
 .pricing-percent {
     display: block;
-    font-size: 5rem;
+    font-size: 4rem;
     font-weight: 900;
     line-height: 1;
     color: var(--color-cyan);
     margin-bottom: 0.5rem;
     font-family: var(--font-heading);
+}
+
+.pricing-percent small {
+    font-size: 0.5em;
+    /* 50% of the parent */
+    color: #fff;
+    /* White instead of cyan for contrast */
+    font-weight: 700;
 }
 
 .pricing-label {
@@ -545,6 +554,13 @@
     font-size: 1.5rem;
     margin-bottom: 3rem;
     color: #ccc;
+}
+
+.final-cta .helper-text {
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    opacity: 0.8;
 }
 
 .btn-giant {
@@ -602,6 +618,10 @@
         padding: 1.5rem;
     }
 
+    .logo span {
+        display: none;
+    }
+
     .hero {
         grid-template-columns: 1fr;
         text-align: center;
@@ -630,5 +650,23 @@
 
     .final-cta h2 {
         font-size: 3rem;
+    }
+
+    .pricing-grid {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .pricing-plus {
+        display: none;
+    }
+
+    .pricing-item {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .pricing-item:last-child {
+        margin-bottom: 0;
     }
 }

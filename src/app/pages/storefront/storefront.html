@@ -63,8 +63,10 @@
 
     <!-- CHECKOUT DRAWER (Modal) -->
     @if (selectedItem(); as item) {
-    <div class="drawer-backdrop" (click)="closeCheckout()">
-        <div class="drawer" (click)="$event.stopPropagation()">
+    <div class="drawer-backdrop" (click)="closeCheckout()" (keydown.escape)="closeCheckout()" tabindex="0"
+        role="button">
+        <div class="drawer" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="-1"
+            role="dialog">
             <div class="drawer-header">
                 <h2>SECURE SPOT</h2>
                 <button class="btn-close" (click)="closeCheckout()">X</button>
@@ -78,23 +80,23 @@
 
                 <form (ngSubmit)="purchase()">
                     <div class="field">
-                        <label>YOUR URL</label>
-                        <input type="text" placeholder="https://mybrand.com" [(ngModel)]="checkoutForm.targetUrl"
-                            name="targetUrl" required>
+                        <label for="targetUrl">YOUR URL</label>
+                        <input type="text" id="targetUrl" placeholder="https://mybrand.com"
+                            [(ngModel)]="checkoutForm.targetUrl" name="targetUrl" required>
                     </div>
                     <div class="field">
-                        <label>BRAND LOGO URL</label>
-                        <input type="text" placeholder="https://mybrand.com/logo.png" [(ngModel)]="checkoutForm.logoUrl"
-                            name="logoUrl">
+                        <label for="logoUrl">BRAND LOGO URL</label>
+                        <input type="text" id="logoUrl" placeholder="https://mybrand.com/logo.png"
+                            [(ngModel)]="checkoutForm.logoUrl" name="logoUrl">
                     </div>
                     <div class="field">
-                        <label>SCRIPT / TALKING POINTS</label>
-                        <textarea placeholder="Key points to mention..." [(ngModel)]="checkoutForm.script" name="script"
-                            required></textarea>
+                        <label for="script">SCRIPT / TALKING POINTS</label>
+                        <textarea id="script" placeholder="Key points to mention..." [(ngModel)]="checkoutForm.script"
+                            name="script" required></textarea>
                     </div>
                     <div class="field">
-                        <label>SPECIAL INSTRUCTIONS</label>
-                        <textarea placeholder="Pronunciation guide, 'Energetic' vibe, etc."
+                        <label for="instructions">SPECIAL INSTRUCTIONS</label>
+                        <textarea id="instructions" placeholder="Pronunciation guide, 'Energetic' vibe, etc."
                             [(ngModel)]="checkoutForm.instructions" name="instructions" rows="2"></textarea>
                     </div>
                     <button class="btn-pay" [disabled]="isProcessing()">

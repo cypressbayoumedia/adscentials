@@ -77,9 +77,8 @@ export class Settings {
     async openStripePortal() {
         this.isLoadingStripe.set(true);
         const createStripeLoginLink = httpsCallable(this.functions, 'createStripeLoginLink');
-
         try {
-            const result: any = await createStripeLoginLink({});
+            const result = await createStripeLoginLink({}) as { data: { url: string } };
             if (result.data.url) {
                 window.location.href = result.data.url;
             }

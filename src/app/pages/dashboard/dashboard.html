@@ -2,7 +2,8 @@
 
     <!-- TOAST NOTIFICATION -->
     @if (toastMessage()) {
-    <div class="toast-notification" (click)="toastMessage.set(null)">
+    <div class="toast-notification" (click)="toastMessage.set(null)" (keydown.enter)="toastMessage.set(null)"
+        tabindex="0" role="button">
         <div class="toast-content">
             <h4 class="toast-title">{{ toastMessage()?.title }}</h4>
             <p class="toast-body">{{ toastMessage()?.body }}</p>
@@ -137,19 +138,20 @@
 
             <form [formGroup]="addSlotForm" (ngSubmit)="saveSlot()">
                 <div class="field-group">
-                    <label>TITLE</label>
-                    <input type="text" formControlName="title"
+                    <label for="slotTitle">TITLE</label>
+                    <input type="text" id="slotTitle" formControlName="title"
                         placeholder="e.g. Podcast Shoutout, Billboard, Newsletter Feature">
                 </div>
 
                 <div class="field-group">
-                    <label>DESCRIPTION (OPTIONAL)</label>
-                    <textarea formControlName="description" placeholder="Describe the placement..."></textarea>
+                    <label for="slotDesc">DESCRIPTION (OPTIONAL)</label>
+                    <textarea id="slotDesc" formControlName="description"
+                        placeholder="Describe the placement..."></textarea>
                 </div>
 
                 <div class="field-group">
-                    <label>PRICE ($)</label>
-                    <input type="number" formControlName="price">
+                    <label for="slotPrice">PRICE ($)</label>
+                    <input type="number" id="slotPrice" formControlName="price">
                 </div>
 
                 @if (!editingTemplate()) {
@@ -161,20 +163,20 @@
 
                 @if (addSlotForm.get('saveAsTemplate')?.value || editingTemplate()) {
                 <div class="field-group">
-                    <label>TEMPLATE NAME</label>
-                    <input type="text" formControlName="templateName">
+                    <label for="templateName">TEMPLATE NAME</label>
+                    <input type="text" id="templateName" formControlName="templateName">
                 </div>
                 }
 
                 @if (!editingTemplate()) {
                 <div class="field-group">
-                    <label>DATE</label>
-                    <input type="date" formControlName="date">
+                    <label for="slotDate">DATE</label>
+                    <input type="date" id="slotDate" formControlName="date">
                 </div>
 
                 <div class="field-group">
-                    <label>REPEAT</label>
-                    <select formControlName="repeatWeeks"
+                    <label for="repeatWeeks">REPEAT</label>
+                    <select id="repeatWeeks" formControlName="repeatWeeks"
                         style="width: 100%; padding: 12px; border: 2px solid #000; font-family: 'Space Mono', monospace; font-weight: bold; background: #fff;">
                         <option [ngValue]="0">Just One (No Repeat)</option>
                         <option [ngValue]="3">4 Weeks (1 Month)</option>

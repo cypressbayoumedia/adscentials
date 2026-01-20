@@ -63,6 +63,12 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
                     destination: connectedAccountId,
                 },
             },
+            submit_type: 'book',
+            custom_text: {
+                submit: {
+                    message: 'You won\'t be charged until the creator accepts your booking request.',
+                },
+            },
             metadata: {
                 bookingId: bookingRef.id,
                 slotId: slotId,

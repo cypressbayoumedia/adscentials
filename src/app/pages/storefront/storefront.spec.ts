@@ -47,7 +47,7 @@ describe('Storefront', () => {
         }).compileComponents();
 
         const inventoryService = TestBed.inject(InventoryService);
-        // @ts-ignore
+        // @ts-expect-error - Catching mock return value
         inventoryService.getSlots.mockReturnValue(of([]));
 
         fixture = TestBed.createComponent(Storefront);
@@ -64,7 +64,8 @@ describe('Storefront', () => {
     });
 
     it('should open checkout when item selected', () => {
-        const mockSlot: any = { slotId: '1', price: 1000 };
+        // @ts-expect-error - Partial mock
+        const mockSlot = { slotId: '1', price: 1000 };
         component.openCheckout(mockSlot);
         expect(component.selectedItem()).toEqual(mockSlot);
     });

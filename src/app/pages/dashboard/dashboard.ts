@@ -234,7 +234,7 @@ export class Dashboard implements OnInit {
                 creatorId: uid,
                 ...slotData,
                 date: nextDate,
-                status: 'available'
+                status: 'available' as const
               });
             }
 
@@ -245,7 +245,7 @@ export class Dashboard implements OnInit {
             await this.inventory.createSlot({
               creatorId: uid,
               ...slotData,
-              status: 'available'
+              status: 'available' as const
             });
           }
         }

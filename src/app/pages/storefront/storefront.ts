@@ -111,7 +111,7 @@ export class Storefront implements OnInit {
         this.isLoading.set(false);
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading profile:', err);
       this.error.set('Failed to load storefront');
       this.isLoading.set(false);
@@ -124,7 +124,7 @@ export class Storefront implements OnInit {
         this.slots.set(slots);
         this.isLoading.set(false);
       },
-      error: (err: any) => {
+      error: (err: unknown) => {
         console.error('Error loading slots:', err);
         this.isLoading.set(false);
       }
@@ -155,7 +155,7 @@ export class Storefront implements OnInit {
     const createCheckoutSession = httpsCallable(this.functions, 'createCheckoutSession');
 
     try {
-      const result: any = await createCheckoutSession({
+      const result = await createCheckoutSession({
         slotId: item.slotId,
         submission: {
           targetUrl: this.checkoutForm.targetUrl,
@@ -163,13 +163,13 @@ export class Storefront implements OnInit {
           logoUrl: this.checkoutForm.logoUrl,
           instructions: this.checkoutForm.instructions
         }
-      });
+      }) as { data: { url: string } };
 
       if (result.data.url) {
         window.location.href = result.data.url;
       }
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Checkout Error", err);
       alert('Checkout failed. Please try again.');
       this.isProcessing.set(false);

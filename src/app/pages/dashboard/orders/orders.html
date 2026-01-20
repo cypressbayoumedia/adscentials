@@ -181,7 +181,7 @@
                     <div class="order-left-col">
                         <div>
                             <div class="status-badge completed">COMPLETED</div>
-                            <h4 class="price-display">${{ booking.displayPrice || '---' | currency}}</h4>
+                            <h4 class="price-display">{{ booking.displayPrice || '---' | currency}}</h4>
                             <p class="date-display">{{ booking.createdAt.toDate() | date:'MMM d, y' }}</p>
                         </div>
                         <div class="actions-area">

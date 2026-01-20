@@ -1,6 +1,6 @@
 
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, doc, setDoc, deleteDoc, query, where, getDocs, orderBy, Timestamp, addDoc, onSnapshot } from '@angular/fire/firestore';
+import { Firestore, collection, doc, setDoc, deleteDoc, query, where, getDocs, orderBy, Timestamp, addDoc, onSnapshot, writeBatch } from '@angular/fire/firestore';
 import { Observable, from, map } from 'rxjs';
 import { AdSlot, SlotTemplate, Booking } from './models';
 
@@ -22,39 +22,41 @@ export class InventoryService {
             return onSnapshot(q, (snap) => {
                 const slots = snap.docs.map(doc => doc.data() as AdSlot);
                 observer.next(slots);
-            }, (error) => observer.error(error));
+            }, (error: unknown) => observer.error(error));
         });
     }
 
-    async createSlot(slot: any) {
+    async createSlot(slot: Omit<Partial<AdSlot>, 'date'> & { date: any }) {
         const slotsRef = collection(this.firestore, 'adSlots');
         const newDocRef = doc(slotsRef);
 
-        // Ensure date is a Date object (Firestore handles usage of Date)
-        let finalDate = slot.date;
+        let finalDate: Timestamp;
         if (typeof slot.date === 'string') {
-            finalDate = new Date(slot.date);
+            finalDate = Timestamp.fromDate(new Date(slot.date));
+        } else if (slot.date instanceof Date) {
+            finalDate = Timestamp.fromDate(slot.date);
+        } else {
+            finalDate = slot.date;
         }
 
         await setDoc(newDocRef, { ...slot, date: finalDate, slotId: newDocRef.id });
         return newDocRef.id;
     }
 
-    async batchCreateSlots(slots: any[]) {
-        const batch = import('@angular/fire/firestore').then(m => m.writeBatch(this.firestore));
-        // Note: writeBatch is not directly exported from @angular/fire/firestore usually, it's from firebase/firestore
-        // But angular fire provides the instance.
-        // Let's use the Modular SDK pattern: writeBatch(firestore)
-        const { writeBatch } = await import('@angular/fire/firestore');
+    async batchCreateSlots(slots: (Omit<Partial<AdSlot>, 'date'> & { date: any })[]) {
         const batchOp = writeBatch(this.firestore);
 
         slots.forEach(slot => {
             const slotsRef = collection(this.firestore, 'adSlots');
             const newDocRef = doc(slotsRef);
 
-            let finalDate = slot.date;
+            let finalDate: Timestamp;
             if (typeof slot.date === 'string') {
-                finalDate = new Date(slot.date);
+                finalDate = Timestamp.fromDate(new Date(slot.date));
+            } else if (slot.date instanceof Date) {
+                finalDate = Timestamp.fromDate(slot.date);
+            } else {
+                finalDate = slot.date;
             }
 
             batchOp.set(newDocRef, { ...slot, date: finalDate, slotId: newDocRef.id });
@@ -63,13 +65,16 @@ export class InventoryService {
         await batchOp.commit();
     }
 
-    async updateSlot(slotId: string, data: Partial<AdSlot>) {
+    async updateSlot(slotId: string, data: Omit<Partial<AdSlot>, 'date'> & { date?: any }) {
         const slotRef = doc(this.firestore, 'adSlots', slotId);
 
-        // Handle date conversion if present
-        const updateData: any = { ...data };
-        if (updateData.date && typeof updateData.date === 'string') {
-            updateData.date = new Date(updateData.date);
+        const updateData: Record<string, any> = { ...data };
+        if (updateData['date']) {
+            if (typeof updateData['date'] === 'string') {
+                updateData['date'] = Timestamp.fromDate(new Date(updateData['date']));
+            } else if (updateData['date'] instanceof Date) {
+                updateData['date'] = Timestamp.fromDate(updateData['date']);
+            }
         }
 
         await setDoc(slotRef, updateData, { merge: true });
@@ -92,7 +97,7 @@ export class InventoryService {
                     templateId: doc.id
                 })) as SlotTemplate[];
                 observer.next(templates);
-            }, (error) => observer.error(error));
+            }, (error: unknown) => observer.error(error));
         });
     }
 
@@ -107,7 +112,7 @@ export class InventoryService {
                     bookingId: doc.id
                 })) as Booking[];
                 observer.next(bookings);
-            }, (error) => observer.error(error));
+            }, (error: unknown) => observer.error(error));
         });
     }
 

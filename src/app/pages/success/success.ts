@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Booking } from '../../core/models';
 
 @Component({
     selector: 'app-success',
@@ -31,33 +32,35 @@ import { Functions, httpsCallable } from '@angular/fire/functions';
             <a routerLink="/" class="btn-primary">
                 Return Home
             </a>
-        } @else if (booking()) {
+        } @else if (booking(); as b) {
             <div class="order-details-box">
                 <div class="detail-row">
                     <span class="detail-label">ORDER ID</span>
-                    <span class="detail-value-mono">#{{ booking().bookingId.slice(0, 8) }}</span>
+                    <span class="detail-value-mono">#{{ b.bookingId.slice(0, 8) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">PRODUCT</span>
-                    <span class="detail-value">{{ booking().productTitle }}</span>
+                    <span class="detail-value">{{ b.productTitle }}</span>
                 </div>
                  <div class="detail-row">
                     <span class="detail-label">CREATOR</span>
-                    <span class="detail-value">{{ booking().creatorName }}</span>
+                    <span class="detail-value">{{ b.creatorName }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">AMOUNT</span>
-                    <span class="detail-value">{{ booking().price / 100 | currency }}</span>
+                    @if (b.price) {
+                        <span class="detail-value">{{ b.price / 100 | currency }}</span>
+                    }
                 </div>
                 
                      <span class="status-badge">
-                        {{ getStatusLabel(booking().status) }}
+                        {{ getStatusLabel(b.status) }}
                      </span>
             </div>
 
             <div class="actions">
-                <a [routerLink]="['/u', booking().creatorId]" class="btn-primary">
-                   Shop More from {{ booking().creatorName }}
+                <a [routerLink]="['/u', b.creatorId]" class="btn-primary">
+                   Shop More from {{ b.creatorName }}
                 </a>
                 
                 <a routerLink="/" class="btn-secondary">
@@ -75,7 +78,7 @@ export class Success implements OnInit {
 
     loading = signal(true);
     error = signal<string | null>(null);
-    booking = signal<any>(null);
+    booking = signal<Booking | null>(null);
 
     async ngOnInit() {
         const sessionId = this.route.snapshot.queryParamMap.get('session_id');
@@ -88,9 +91,9 @@ export class Success implements OnInit {
 
         try {
             const getBooking = httpsCallable(this.functions, 'getBookingBySession');
-            const result: any = await getBooking({ sessionId });
+            const result = await getBooking({ sessionId }) as { data: Booking };
             this.booking.set(result.data);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err);
             this.error.set('Unable to load order details.');
         } finally {

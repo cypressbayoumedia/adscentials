@@ -60,6 +60,7 @@ export interface Booking {
     slotId: string;
     creatorId: string;
     creatorName?: string; // Cache: for emails
+    creatorHandle?: string; // NEW: for links
     sponsorId: string;
     sponsorName?: string; // Cache: for emails
     sponsorEmail?: string; // NEW: For guest checkout

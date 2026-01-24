@@ -8,13 +8,9 @@ import { stripeSecret, getStripe } from "./config";
  * 2. Create Checkout Session (Payment + Fee)
  */
 export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: true }, async (request) => {
-    if (!request.auth) {
-        throw new HttpsError('unauthenticated', 'User must be logged in.');
-    }
-
     // Input: slotId, bookings details
     const { slotId, submission } = request.data;
-    const sponsorId = request.auth.uid;
+    const sponsorId = request.auth ? request.auth.uid : 'guest';
     const stripe = getStripe();
 
     try {
@@ -42,9 +38,30 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
         // 4. Create Booking Ref (so we can pass ID to Stripe)
         const bookingRef = db.collection('bookings').doc();
 
+        // Extract passed sponsor details
+        const providedSponsorName = submission?.sponsorName;
+        const providedSponsorEmail = submission?.sponsorEmail;
+
+        // Fetch Sponsor Details logic (overrides provided if logged in, or uses provided if guest)
+        let sponsorName = 'Guest Sponsor';
+        let sponsorEmail: string | undefined = undefined;
+
+        if (sponsorId !== 'guest') {
+            const sponsorDoc = await db.collection('users').doc(sponsorId).get();
+            const sponsorData = sponsorDoc.data();
+            sponsorName = sponsorData?.displayName || 'Sponsor';
+            sponsorEmail = sponsorData?.email;
+        } else {
+            // Use provided details for guest
+            if (providedSponsorName) sponsorName = providedSponsorName;
+            if (providedSponsorEmail) sponsorEmail = providedSponsorEmail;
+        }
+
+
         // 5. Create Session
         const session = await stripe.checkout.sessions.create({
             mode: 'payment',
+            customer_email: sponsorEmail, // Pre-fill email
             payment_method_types: ['card'],
             line_items: [{
                 price_data: {
@@ -52,6 +69,11 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
                     unit_amount: price,
                     product_data: {
                         name: slot.title || `${slot.platform.toUpperCase()} - ${slot.type} Ad`,
+                        description: slot.description,
+                        metadata: {
+                            slotId: slotId,
+                            sponsorId: sponsorId,
+                        },
                     },
                 },
                 quantity: 1,
@@ -84,17 +106,6 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
         const reservedUntil = Timestamp.fromMillis(Date.now() + 15 * 60 * 1000);
         batch.update(slotRef, { status: 'pending', reservedUntil: reservedUntil });
 
-        // Fetch Sponsor Details for the name (if logged in)
-        let sponsorName = 'Guest Sponsor';
-        let sponsorEmail: string | undefined = undefined;
-
-        if (sponsorId !== 'guest') {
-            const sponsorDoc = await db.collection('users').doc(sponsorId).get();
-            const sponsorData = sponsorDoc.data();
-            sponsorName = sponsorData?.displayName || 'Sponsor';
-            sponsorEmail = sponsorData?.email;
-        }
-
         batch.set(bookingRef, {
             bookingId: bookingRef.id,
             slotId: slotId,
@@ -102,7 +113,7 @@ export const createCheckoutSession = onCall({ secrets: [stripeSecret], cors: tru
             creatorName: creatorData?.displayName || 'Creator', // Cache creator name
             sponsorId: sponsorId,
             sponsorName: sponsorName,
-            sponsorEmail: sponsorEmail, // Undefined for guests initially, filled by webhook later
+            sponsorEmail: sponsorEmail, // Now correctly filled for guests too
             productTitle: slot.title || `${slot.platform.toUpperCase()} - ${slot.type} Ad`, // Cache product title
             price: price, // Cache price
             stripeSessionId: session.id,

@@ -147,6 +147,17 @@ export const getBookingBySession = onCall(async (request) => {
 
         const booking = snapshot.docs[0].data();
 
+        // 2. Fetch Creator Handler
+        let creatorHandle = booking.creatorId;
+        try {
+            const creatorDoc = await db.collection('users').doc(booking.creatorId).get();
+            if (creatorDoc.exists) {
+                creatorHandle = creatorDoc.data()?.handle || booking.creatorId;
+            }
+        } catch (e) {
+            logger.warn('Could not fetch creator handle', e);
+        }
+
         // Return only safe, necessary data
         return {
             bookingId: booking.bookingId,
@@ -154,7 +165,8 @@ export const getBookingBySession = onCall(async (request) => {
             productTitle: booking.productTitle,
             price: booking.price,
             creatorName: booking.creatorName,
-            creatorId: booking.creatorId, // Needed for "Shop More" link
+            creatorId: booking.creatorId,
+            creatorHandle: creatorHandle, // NEW
             createdAt: booking.createdAt?.toMillis() || Date.now()
         };
 

@@ -1,0 +1,70 @@
+<div class="success-container">
+    <div class="success-card">
+
+        <!-- Icon -->
+        <div class="success-icon">
+            <span class="material-symbols-rounded text-3xl">check</span>
+        </div>
+
+        <h1 class="title">Payment Successful!</h1>
+        <p class="subtitle">Your order has been placed and is waiting for approval.</p>
+
+        @if (loading()) {
+        <div class="loading-skeleton">
+            <div class="skeleton-bar-lg"></div>
+            <div class="skeleton-bar-md"></div>
+        </div>
+        } @else if (error()) {
+        <div class="error-box">
+            {{ error() }}
+        </div>
+        <a routerLink="/" class="btn-primary">
+            Return Home
+        </a>
+        } @else if (booking(); as b) {
+        <!-- Bookmark Alert -->
+        <div class="bookmark-alert">
+            <p>★ BOOKMARK THIS PAGE TO TRACK YOUR ORDER ★</p>
+        </div>
+
+        <div class="order-details-box">
+            <div class="detail-row">
+                <span class="detail-label">ORDER ID</span>
+                <span class="detail-value-mono">#{{ b.bookingId.slice(0, 8) }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">PRODUCT</span>
+                <span class="detail-value">{{ b.productTitle || 'Ad Slot' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">CREATOR</span>
+                <span class="detail-value">{{ b.creatorName || 'Creator' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">AMOUNT</span>
+                <span class="detail-value">{{ (b.price || 0) / 100 | currency }}</span>
+            </div>
+
+            <span class="status-badge">
+                {{ getStatusLabel(b.status) }}
+            </span>
+        </div>
+
+        <div class="rate-creator-placeholder">
+            <p class="rate-label">Rate this Creator</p>
+            <div class="stars">★★★★★</div>
+            <span class="coming-soon-badge">COMING SOON</span>
+        </div>
+
+        <div class="actions">
+            <a [routerLink]="['/', b.creatorHandle]" class="btn-primary">
+                Shop More from {{ b.creatorName || 'Creator' }}
+            </a>
+
+            <a routerLink="/" class="btn-secondary">
+                Return to Home
+            </a>
+        </div>
+        }
+    </div>
+</div>

@@ -80,6 +80,16 @@
 
                 <form (ngSubmit)="purchase()">
                     <div class="field">
+                        <label for="sponsorName">SPONSOR / BRAND NAME</label>
+                        <input type="text" id="sponsorName" placeholder="Brand Name"
+                            [(ngModel)]="checkoutForm.sponsorName" name="sponsorName" required>
+                    </div>
+                    <div class="field">
+                        <label for="sponsorEmail">EMAIL ADDRESS</label>
+                        <input type="email" id="sponsorEmail" placeholder="you@brand.com"
+                            [(ngModel)]="checkoutForm.sponsorEmail" name="sponsorEmail" required>
+                    </div>
+                    <div class="field">
                         <label for="targetUrl">YOUR URL</label>
                         <input type="text" id="targetUrl" placeholder="https://mybrand.com"
                             [(ngModel)]="checkoutForm.targetUrl" name="targetUrl" required>

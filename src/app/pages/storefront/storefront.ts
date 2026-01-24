@@ -35,7 +35,9 @@ export class Storefront implements OnInit {
     targetUrl: '',
     script: '',
     logoUrl: '',
-    instructions: ''
+    instructions: '',
+    sponsorName: '',
+    sponsorEmail: ''
   };
 
   // The handle from the URL
@@ -137,18 +139,14 @@ export class Storefront implements OnInit {
 
   closeCheckout() {
     this.selectedItem.set(null);
-    this.checkoutForm = { targetUrl: '', script: '', logoUrl: '', instructions: '' };
+    this.checkoutForm = { targetUrl: '', script: '', logoUrl: '', instructions: '', sponsorName: '', sponsorEmail: '' };
   }
 
   async purchase() {
     const item = this.selectedItem();
-    const currentUser = this.auth.currentUser();
+    // Guest checkout is allowed now
 
     if (!item) return;
-    if (!currentUser) {
-      alert('Please login to purchase slot');
-      return;
-    }
 
     this.isProcessing.set(true);
 
@@ -161,7 +159,9 @@ export class Storefront implements OnInit {
           targetUrl: this.checkoutForm.targetUrl,
           script: this.checkoutForm.script,
           logoUrl: this.checkoutForm.logoUrl,
-          instructions: this.checkoutForm.instructions
+          instructions: this.checkoutForm.instructions,
+          sponsorName: this.checkoutForm.sponsorName,
+          sponsorEmail: this.checkoutForm.sponsorEmail
         }
       }) as { data: { url: string } };
 

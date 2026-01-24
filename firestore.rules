@@ -31,6 +31,14 @@ service cloud.firestore {
       allow write: if isOwner(userId);
     }
 
+    // Handles
+    // Public read for resolving handles to UIDs
+    match /handles/{handle} {
+      allow read: if true;
+      // Allow user to claim a handle if the uid matches their own
+      allow write: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+    }
+
     // Ad Slots
     // Public read (Storefront). Creator write (Dashboard).
     match /adSlots/{slotId} {

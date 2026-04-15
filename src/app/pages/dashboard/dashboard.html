@@ -53,6 +53,7 @@
     </nav>
 
     <main class="dashboard-content">
+        @if (user()?.stripeConnected) {
         @switch (activeTab()) {
         @case ('slots') {
         <div class="slot-list">
@@ -122,6 +123,98 @@
         <app-orders [bookings]="bookings()" [slots]="slots()" (refreshData)="user() ? loadData(user()!.uid) : null">
         </app-orders>
         }
+        }
+        } @else {
+        <!-- STRIPE TRUST ONBOARDING CARD -->
+        <div class="stripe-trust-card">
+            <div class="trust-card-header">
+                <div class="stripe-badges">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
+                        alt="Stripe" class="stripe-logo">
+                    <span class="badge-partner">PLATFORM PARTNER</span>
+                </div>
+                <h2>Finish Setup to Start Earning</h2>
+                <p>To accept bookings and receive payouts, you need to connect your bank account securely via Stripe.
+                </p>
+            </div>
+
+            <div class="trust-points">
+                <div class="point">
+                    <span class="material-symbols-rounded">verified_user</span>
+                    <div>
+                        <strong>Bank-Grade Security</strong>
+                        <p>Stripe uses world-class security standards to keep your data safe.</p>
+                    </div>
+                </div>
+                <div class="point">
+                    <span class="material-symbols-rounded">visibility_off</span>
+                    <div>
+                        <strong>Privacy First</strong>
+                        <p>Adscentials never sees or stores your bank details or social security number.</p>
+                    </div>
+                </div>
+                <div class="point">
+                    <span class="material-symbols-rounded">bolt</span>
+                    <div>
+                        <strong>Fast Setup</strong>
+                        <p>Takes less than 2 minutes. Once connected, your store goes live instantly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-connect-large" (click)="connectStripe()" [disabled]="isLoadingStripe()">
+                @if (isLoadingStripe()) {
+                <span class="spinner"></span> Connecting...
+                } @else {
+                SECURELY CONNECT PAYOUTS
+                }
+            </button>
+
+            <div class="faq-section">
+                <h3>Common Questions</h3>
+
+                <div class="faq-item" [class.active]="activeFaq() === 0">
+                    <button (click)="toggleFaq(0)">
+                        <span>Why do I need a Stripe account?</span>
+                        <span class="material-symbols-rounded icon-toggle">expand_more</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We use Stripe to handle the complicated parts of finance. It ensures you get paid on time,
+                            handles tax reporting (if applicable), and verifies that sponsors are legitimate before they
+                            book you.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" [class.active]="activeFaq() === 1">
+                    <button (click)="toggleFaq(1)">
+                        <span>Does Adscentials see my banking info?</span>
+                        <span class="material-symbols-rounded icon-toggle">expand_more</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>No. All sensitive documents and banking details are submitted directly to Stripe's encrypted
+                            systems. We only receive a notification that your account is "Verified" so we can send
+                            payouts.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" [class.active]="activeFaq() === 2">
+                    <button (click)="toggleFaq(2)">
+                        <span>What information does Stripe collect?</span>
+                        <span class="material-symbols-rounded icon-toggle">expand_more</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Depending on your region, Stripe may ask for your legal name, business details, and bank
+                            account or debit card for payouts. This is required by law for "Know Your Customer" (KYC)
+                            anti-fraud regulations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trust-footer">
+                <span class="material-symbols-rounded">lock</span>
+                SECURE 256-BIT ENCRYPTED CONNECTION
+            </div>
+        </div>
         }
     </main>
 

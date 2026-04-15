@@ -60,6 +60,7 @@ export class Dashboard implements OnInit {
   linkCopied = signal(false);
   isLoadingStripe = signal(false);
   isProcessing = signal(false);
+  activeFaq = signal<number | null>(null);
 
   // Forms
   addSlotForm = this.fb.group({
@@ -310,6 +311,14 @@ export class Dashboard implements OnInit {
     const uid = this.user()?.uid;
     if (uid) {
       this.inventory.getTemplates(uid).subscribe(t => this.templates.set(t));
+    }
+  }
+
+  toggleFaq(index: number) {
+    if (this.activeFaq() === index) {
+      this.activeFaq.set(null);
+    } else {
+      this.activeFaq.set(index);
     }
   }
 

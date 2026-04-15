@@ -1,5 +1,5 @@
 
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,6 +15,7 @@ import { of, timer } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './onboarding.html',
   styleUrl: './onboarding.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Onboarding {
   private fb = inject(FormBuilder);
@@ -41,6 +42,12 @@ export class Onboarding {
     photoURL: [this.currentUser()?.photoURL || '']
   });
 
+  // Derived Preview URL for the UI
+  photoPreview = computed(() => {
+    const url = this.form.get('photoURL')?.value;
+    return url || this.currentUser()?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback';
+  });
+
   get handleControl() {
     return this.form.get('handle') as FormControl;
   }
@@ -52,6 +59,18 @@ export class Onboarding {
   handleAvailable = signal<boolean | null>(null);
 
   constructor() {
+    // Sync Auth data to form once it loads
+    effect(() => {
+      const user = this.currentUser();
+      if (user) {
+        this.form.patchValue({
+          displayName: this.form.get('displayName')?.value || user.displayName || '',
+          photoURL: this.form.get('photoURL')?.value || user.photoURL || '',
+          bio: this.form.get('bio')?.value || user.bio || ''
+        }, { emitEvent: false });
+      }
+    });
+
     // Handle Availability Checker
     this.handleControl.valueChanges.pipe(
       debounceTime(500),

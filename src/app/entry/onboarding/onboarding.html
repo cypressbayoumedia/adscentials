@@ -14,7 +14,7 @@
             <div class="form-group center">
                 <label>Profile Picture</label>
                 <div class="avatar-preview">
-                    <img [src]="form.value.photoURL || 'https://via.placeholder.com/100'" alt="Avatar">
+                    <img [src]="photoPreview()" alt="Avatar">
                 </div>
                 <input type="url" formControlName="photoURL" placeholder="https://example.com/photo.jpg"
                     class="sm-input">

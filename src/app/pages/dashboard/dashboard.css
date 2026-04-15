@@ -690,3 +690,235 @@
         font-size: 1.75rem;
     }
 }
+
+/* ==========================================================================
+   STRIPE TRUST CARD STYLES
+   ========================================================================== */
+
+.stripe-trust-card {
+    background: white;
+    border: var(--border-width) solid #000;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: var(--shadow-soft);
+    max-width: 700px;
+    margin: 2rem auto;
+    text-align: center;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.trust-card-header {
+    margin-bottom: 2.5rem;
+}
+
+.stripe-badges {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.stripe-logo {
+    height: 32px;
+}
+
+.badge-partner {
+    background: #635bff;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.trust-card-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 900;
+    margin-bottom: 0.75rem;
+    letter-spacing: -1px;
+}
+
+.trust-card-header p {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.trust-points {
+    display: grid;
+    gap: 1.5rem;
+    text-align: left;
+    margin-bottom: 3rem;
+}
+
+.point {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: #f9fafb;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    transition: transform 0.2s;
+}
+
+.point:hover {
+    transform: translateX(5px);
+    background: #fff;
+    border-color: #000;
+}
+
+.point span {
+    font-size: 2rem;
+    color: var(--color-cyan);
+    flex-shrink: 0;
+}
+
+.point strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.point p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.btn-connect-large {
+    width: 100%;
+    padding: 1.25rem;
+    background: #635bff;
+    color: white;
+    border: var(--border-width) solid #000;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #000;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+}
+
+.btn-connect-large:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #000;
+}
+
+.btn-connect-large:active:not(:disabled) {
+    transform: translate(0, 0);
+    box-shadow: none;
+}
+
+.faq-section {
+    text-align: left;
+    border-top: 1px solid #eee;
+    padding-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.faq-section h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+.faq-item {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.faq-item button {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.faq-item button:hover {
+    background: #f9fafb;
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: #f9fafb;
+}
+
+.faq-answer p {
+    padding: 0 1.25rem 1.25rem;
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+.faq-item.active {
+    border-color: #000;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 200px;
+}
+
+.faq-item.active .icon-toggle {
+    transform: rotate(180deg);
+}
+
+.trust-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #999;
+    letter-spacing: 1px;
+}
+
+.trust-footer span {
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    .stripe-trust-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+
+    .trust-card-header h2 {
+        font-size: 1.75rem;
+    }
+}
